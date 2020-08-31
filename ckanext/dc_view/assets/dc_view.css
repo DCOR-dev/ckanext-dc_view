@@ -1,0 +1,17 @@
+.column {
+  -webkit-column-count: 3;
+     -moz-column-count: 3;
+          column-count: 3;
+  -webkit-column-width: 320px;
+     -moz-column-width: 320px;
+          column-width: 320px;
+}
+
+
+caption { 
+  display: table-caption;
+  text-align: left;
+  font-weight: bold;
+  color: black;
+  padding-left: 2px;
+}

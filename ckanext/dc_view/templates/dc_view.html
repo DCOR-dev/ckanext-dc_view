@@ -1,0 +1,11 @@
+{% asset 'dc_view/dc_view' %}
+
+{% block page %}
+
+	<div class="column">
+	   {{ h.literal(metadata_html) }}
+	   <img class="preview" src="{{ preview_url }}" alt="Preview not available yet.">
+	</div>
+
+  
+{% endblock %}
