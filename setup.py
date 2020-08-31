@@ -3,9 +3,9 @@ from setuptools import setup, find_packages
 from codecs import open  # To use a consistent encoding
 import sys
 
-author = u"Paul Müller"
+author = "Paul Müller"
 authors = [author]
-description = 'CKAN extension for viewing RT-DC-related data (used by DCOR)'
+description = 'Preview DC data in DCOR '
 name = 'ckanext-dc_view'
 year = "2020"
 
