@@ -26,7 +26,7 @@ class DCViewPlugin(p.SingletonPlugin):
 
         # Add plugin url rules to Blueprint object
         rules = [
-            ('/dataset/<id>/resource/<resource_id>/preview.jpg',
+            ('/dataset/<uuid:id>/resource/<uuid:resource_id>/preview.jpg',
              'dcpreview',
              dcpreview),
         ]

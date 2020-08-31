@@ -9,10 +9,15 @@ import ckan.plugins.toolkit as toolkit
 
 
 def dcpreview(id, resource_id):
+    """Serve a preview image on disk
+
+    `id` and `resource_id` are strings or uuids.
+    """
     # Code borrowed from ckan/controllers/package.py:resource_download
     context = {'model': model, 'session': model.Session,
                'user': c.user, 'auth_user_obj': c.userobj}
-
+    id = str(id)
+    resource_id = str(resource_id)
     try:
         rsc = toolkit.get_action('resource_show')(context, {'id': resource_id})
         toolkit.get_action('package_show')(context, {'id': id})
