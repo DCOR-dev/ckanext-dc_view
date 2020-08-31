@@ -43,7 +43,10 @@ class DCViewPlugin(p.SingletonPlugin):
     def after_create(self, context, resource):
         """Generate preview image and html file"""
         path = get_dataset_path(context, resource)
-        toolkit.enqueue_job(create_preview_job, [path, resource])
+        toolkit.enqueue_job(create_preview_job,
+                            [path, resource],
+                            title="Create resource preview image",
+                            rq_kwargs={"timeout": 60})
 
     # IResourceView
     def info(self):
