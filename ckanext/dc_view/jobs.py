@@ -2,7 +2,7 @@ from collections import OrderedDict
 import pathlib
 
 import dclab
-from dcor_shared import DC_MIME_TYPES, wait_for_resource
+from dcor_shared import DC_MIME_TYPES, get_resource_path, wait_for_resource
 import numpy as np
 from matplotlib.gridspec import GridSpec
 import matplotlib
@@ -10,16 +10,16 @@ matplotlib.use('agg')
 import matplotlib.pylab as plt  # noqa: E402
 
 
-def create_preview_job(filepath, resource, override=False):
+def create_preview_job(resource, override=False):
     """Generate a *_preview.png file for a DC resource"""
-    filepath = pathlib.Path(filepath)
-    wait_for_resource(filepath)
+    path = pathlib.Path(get_resource_path(resource["id"]))
+    wait_for_resource(path)
     mtype = resource.get('mimetype', '')
     if mtype in DC_MIME_TYPES:
         # only do this for rtdc data
-        jpgpath = filepath.with_name(filepath.name + "_preview.jpg")
+        jpgpath = path.with_name(path.name + "_preview.jpg")
         if not jpgpath.exists() or override:
-            generate_preview(filepath, jpgpath)
+            generate_preview(path, jpgpath)
 
 
 def generate_preview(path_rtdc, path_jpg):

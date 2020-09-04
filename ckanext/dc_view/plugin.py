@@ -3,7 +3,7 @@ import ckan.lib.datapreview as datapreview
 import ckan.plugins.toolkit as toolkit
 import ckan.plugins as p
 
-from dcor_shared import DC_MIME_TYPES, get_dataset_path
+from dcor_shared import DC_MIME_TYPES
 
 from .jobs import create_preview_job
 from .meta import render_metadata_html
@@ -42,9 +42,8 @@ class DCViewPlugin(p.SingletonPlugin):
     # IResourceController
     def after_create(self, context, resource):
         """Generate preview image and html file"""
-        path = get_dataset_path(context, resource)
         toolkit.enqueue_job(create_preview_job,
-                            [path, resource],
+                            [resource],
                             title="Create resource preview image",
                             rq_kwargs={"timeout": 60})
 
