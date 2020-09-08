@@ -6,7 +6,7 @@ import shutil
 import tempfile
 
 # Create a temporary matplotlib config directory which is removed on exit
-mpldir = tempfile.mkdtemp()
+mpldir = tempfile.mkdtemp(prefix="ckan_dcor_dc_view_")
 atexit.register(shutil.rmtree, mpldir)
 os.environ['MPLCONFIGDIR'] = mpldir
 
