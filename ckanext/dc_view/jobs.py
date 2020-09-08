@@ -1,5 +1,14 @@
+import atexit
 from collections import OrderedDict
+import os
 import pathlib
+import shutil
+import tempfile
+
+# Create a temporary matplotlib config directory which is removed on exit
+mpldir = tempfile.mkdtemp()
+atexit.register(shutil.rmtree, mpldir)
+os.environ['MPLCONFIGDIR'] = mpldir
 
 import dclab
 from dcor_shared import DC_MIME_TYPES, get_resource_path, wait_for_resource
