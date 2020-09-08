@@ -5,16 +5,17 @@ import pathlib
 import shutil
 import tempfile
 
+import dclab
+from dcor_shared import DC_MIME_TYPES, get_resource_path, wait_for_resource
+import numpy as np
+
 # Create a temporary matplotlib config directory which is removed on exit
 mpldir = tempfile.mkdtemp(prefix="ckan_dcor_dc_view_")
 atexit.register(shutil.rmtree, mpldir)
 os.environ['MPLCONFIGDIR'] = mpldir
 
-import dclab
-from dcor_shared import DC_MIME_TYPES, get_resource_path, wait_for_resource
-import numpy as np
-from matplotlib.gridspec import GridSpec
-import matplotlib
+from matplotlib.gridspec import GridSpec  # noqa: E402
+import matplotlib  # noqa: E402
 matplotlib.use('agg')
 import matplotlib.pylab as plt  # noqa: E402
 
