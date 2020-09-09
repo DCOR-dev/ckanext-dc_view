@@ -45,7 +45,7 @@ class DCViewPlugin(p.SingletonPlugin):
         toolkit.enqueue_job(create_preview_job,
                             [resource],
                             title="Create resource preview image",
-                            rq_kwargs={"timeout": 60})
+                            rq_kwargs={"timeout": 360})
 
     # IResourceView
     def info(self):
