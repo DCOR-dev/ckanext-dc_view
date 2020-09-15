@@ -24,7 +24,8 @@ Installation
 
 
 Add this extension to the plugins and defaul_views in ckan.ini:
-```
-ckan.plugins = [...] dc_view
-ckan.views.default_views = [...] dc_view
-```
+
+::
+
+    ckan.plugins = [...] dc_view
+    ckan.views.default_views = [...] dc_view

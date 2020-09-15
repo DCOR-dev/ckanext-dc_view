@@ -1,0 +1,31 @@
+notifications:
+  email: false
+os: linux
+language: python
+python: 3.8
+install:
+# install binary packages
+- travis_retry pip install --upgrade pip
+- travis_retry pip install setuptools wheel
+# install package
+- travis_retry pip install -e .
+# for tests:
+- travis_retry pip install codecov coverage flake8
+- pip freeze
+script:
+#- coverage run --source=ckanext setup.py test
+#- coverage report -m
+- flake8 ckanext
+after_success:
+- codecov
+before_deploy:
+#- python setup.py sdist bdist_wheel
+deploy:
+  provider: pypi
+  user: "ci_dcor"
+  password:
+    secure: "wM3Vgm5+znPXFu/hFNxreXmE68+hOkm1RhWipvOlD5FmutvBKNLG9qcROQEsFn9pAKHJYh9CGvidHBIqChJU/jUXM6Rm04bpeqG2+VBfZ9YP97Ay4JJVazUE/9KVTVke/OvGU0g4Gr8XYjP02QXmo6IMG63hhHFx+utfe12Kl/8BPMwg2ADOk/bDwzb1VDarVvOwvaTx7B77+z4ls/NLUZVdofO9zg1svHbGgczpspWnEZkQ83y1TNb/kGtPpoZo/Ecl27WCR22vvbynGP9qA9A2z9wWTnxsBg2nw2VO/KJ1cZGNwmidzX3FR4S+bGGqCgMWc6vgb8HCe2tZ0UdPLsr1wYLYolHR4M4jt16WU/OlPddtKrOsvDkbQqThLTx76bKbqDc7cQ66aS+xHh5dccPc1NmLvomnyhDn0bo4x99j1LizpwgYi5AxADhNFtlm7cgBhB5gH+Jk1r6Pdc6bJehOxsbXOs5NAtyIosYTFUuiFsPBmyoXHQWJ17mTidzOc6SJ5SvBaS/BNjbcsNmoyTGKAMc1YVlsCVPq4iPZ3qCRWCKMAAGeqOLWLyu1lVWaPghHLK77YCwwxOSvpP8MfyLaIU2ImB/NJGktYktHYs2SAe3hCTUA1euSRJ5i3Qe0ZMhFW68om2BYCUlbEF0fZnZ0dF3Lcr0R2k5lfD/iDcU="
+  on:
+    tags: true
+  skip_cleanup: true
+  skip_existing: true
