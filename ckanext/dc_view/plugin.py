@@ -1,4 +1,5 @@
 from flask import Blueprint
+from ckan.common import config
 import ckan.lib.datapreview as datapreview
 import ckan.plugins.toolkit as toolkit
 import ckan.plugins as p
@@ -42,10 +43,27 @@ class DCViewPlugin(p.SingletonPlugin):
     # IResourceController
     def after_create(self, context, resource):
         """Generate preview image and html file"""
+        jid = "-".join([resource["id"], resource["name"], "preview"])
+        condense_jid = "-".join([resource["id"], resource["name"], "condense"])
+        exts = config.get("ckan.plugins")
+        if "dc_serve" in exts:
+            # The dc_serve extension is available, which produces a condensed
+            # dataset. We can use that for plotting.
+            rq_kwargs = {"timeout": 60,
+                         "job_id": jid,
+                         "depends_on": condense_jid}
+            queue = "dcor-normal"
+        else:
+            # The dc_serve extension is NOT available. Creating the preview
+            # image might take longer.
+            rq_kwargs = {"timeout": 1800,
+                         "job_id": jid}
+            queue = "dcor-long"
         toolkit.enqueue_job(create_preview_job,
                             [resource],
                             title="Create resource preview image",
-                            rq_kwargs={"timeout": 360})
+                            queue=queue,
+                            rq_kwargs=rq_kwargs)
 
     # IResourceView
     def info(self):

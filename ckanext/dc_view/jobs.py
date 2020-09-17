@@ -33,14 +33,24 @@ def create_preview_job(resource, override=False):
 
 
 def generate_preview(path_rtdc, path_jpg):
-    with dclab.rtdc_dataset.fmt_hdf5.RTDC_HDF5(path_rtdc) as ds:
-        fig = overview_plot(ds)
-        fig.savefig(str(path_jpg), dpi=80)
-        plt.close()
+    # Check whether we have a condensed version of the dataset.
+    # If so, also pass that to overview_plot.
+    path_condensed = path_rtdc.with_name(path_rtdc.name + "_condensed.rtdc")
+    if path_condensed.exists():
+        dsc = dclab.rtdc_dataset.fmt_hdf5.RTDC_HDF5(path_condensed)
+    else:
+        dsc = None
+    # This is the original dataset
+    ds = dclab.rtdc_dataset.fmt_hdf5.RTDC_HDF5(path_rtdc)
+    fig = overview_plot(ds, dsc=dsc)
+    fig.savefig(str(path_jpg), dpi=80)
+    plt.close()
 
 
-def overview_plot(ds):
+def overview_plot(ds, dsc=None):
     """Simple overview plot adapted from the dclab examples"""
+    if dsc is None:
+        dsc = ds
     # Features for scatter plot
     SCATTER_X = "area_um"
     SCATTER_Y = "bright_avg"
@@ -76,12 +86,13 @@ def overview_plot(ds):
         ax1 = fig.add_subplot(gs[ii])
         ax1.set_title("Basic scatter plot")
         ii += 1
-        x_start = np.percentile(ds[SCATTER_X], 1)
-        x_end = np.percentile(ds[SCATTER_X], 99)
-        y_start = np.percentile(ds[SCATTER_Y], 1)
-        y_end = np.percentile(ds[SCATTER_Y], 99)
+        x_start = np.percentile(dsc[SCATTER_X], 1)
+        x_end = np.percentile(dsc[SCATTER_X], 99)
+        y_start = np.percentile(dsc[SCATTER_Y], 1)
+        y_end = np.percentile(dsc[SCATTER_Y], 99)
 
-        ax1.plot(ds[SCATTER_X], ds[SCATTER_Y], "o", color="k", alpha=.2, ms=1)
+        ax1.plot(dsc[SCATTER_X], dsc[SCATTER_Y],
+                 "o", color="k", alpha=.2, ms=1)
         ax1.set_xlabel(xlabel)
         ax1.set_ylabel(ylabel)
         ax1.set_xlim(x_start, x_end)
@@ -90,7 +101,7 @@ def overview_plot(ds):
         ax2 = fig.add_subplot(gs[ii])
         ax2.set_title("KDE scatter plot")
         ii += 1
-        sc = ax2.scatter(ds[SCATTER_X], ds[SCATTER_Y],
+        sc = ax2.scatter(dsc[SCATTER_X], dsc[SCATTER_Y],
                          c=ds.get_kde_scatter(xax=SCATTER_X,
                                               yax=SCATTER_Y,
                                               kde_type="histogram"),

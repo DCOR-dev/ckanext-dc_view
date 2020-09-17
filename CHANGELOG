@@ -1,3 +1,9 @@
+0.5.4
+ - enh: add a ``job_id`` to the "preview" background job and,
+   depending on whether or not the ckanext-dc_serve extensions is
+   installed, wait for the "condense" background job before
+   attempting to create a preview image; this avoids computing
+   the brightness twice (#2)
 0.5.3
  - fix: manifest did not include .yml
 0.5.2
