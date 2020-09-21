@@ -1,3 +1,5 @@
+0.5.7
+ - enh: only create relevant jobs for DC mimetype data
 0.5.6
  - fix: use "deform" for datasets that don't have "bright_avg"
    in preview
