@@ -1,7 +1,6 @@
 import atexit
 from collections import OrderedDict
 import os
-import pathlib
 import shutil
 import tempfile
 
@@ -22,7 +21,7 @@ import matplotlib.pylab as plt  # noqa: E402
 
 def create_preview_job(resource, override=False):
     """Generate a *_preview.png file for a DC resource"""
-    path = pathlib.Path(get_resource_path(resource["id"]))
+    path = get_resource_path(resource["id"])
     wait_for_resource(path)
     mtype = resource.get('mimetype', '')
     if mtype in DC_MIME_TYPES:

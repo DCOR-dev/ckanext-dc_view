@@ -1,3 +1,5 @@
+0.5.5
+ - ref: move to dcor_shared 0.2.5
 0.5.4
  - enh: add a ``job_id`` to the "preview" background job and,
    depending on whether or not the ckanext-dc_serve extensions is
