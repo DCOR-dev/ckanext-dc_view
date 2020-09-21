@@ -52,12 +52,16 @@ def overview_plot(ds, dsc=None):
         dsc = ds
     # Features for scatter plot
     SCATTER_X = "area_um"
-    SCATTER_Y = "bright_avg"
+    if "bright_avg" in ds:
+        SCATTER_Y = "bright_avg"
+        ylabel = "Brightness [a.u]"
+    else:
+        SCATTER_Y = "deform"
+        ylabel = dclab.dfn.get_feature_label(SCATTER_Y, rtdc_ds=ds)
     # Event index to display
     EVENT_INDEX = min(len(ds)-1, 47)
 
     xlabel = dclab.dfn.get_feature_label(SCATTER_X, rtdc_ds=ds)
-    ylabel = "Brightness [a.u]"
 
     plots = OrderedDict()
     plots["scatter_basic"] = SCATTER_X in ds and SCATTER_Y in ds
