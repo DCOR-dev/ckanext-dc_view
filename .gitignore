@@ -41,3 +41,4 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 _version_save.py
+.idea

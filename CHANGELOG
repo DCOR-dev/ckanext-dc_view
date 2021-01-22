@@ -1,3 +1,6 @@
+0.5.8
+ - ci: migrate to GH Actions
+ - build: use install_requires instead of requirements.txt
 0.5.7
  - enh: only create relevant jobs for DC mimetype data
 0.5.6

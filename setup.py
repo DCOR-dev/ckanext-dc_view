@@ -10,7 +10,7 @@ name = 'ckanext-dc_view'
 year = "2020"
 
 sys.path.insert(0, realpath(dirname(__file__))+"/" + "/".join(name.split("-")))
-from _version import version
+from _version import version  # noqa: E402
 
 
 setup(
@@ -27,10 +27,12 @@ setup(
     package_dir={name: name},
     namespace_packages=['ckanext'],
     install_requires=[
-        # CKAN extensions should not list dependencies here, but in a separate
-        # ``requirements.txt`` file.
-        #
-        # http://docs.ckan.org/en/latest/extensions/best-practices.html#add-third-party-libraries-to-requirements-txt
+        # the "ckan" dependency is implied
+        "dclab>=0.27.11",
+        "dcor_shared>=0.2.0",
+        "matplotlib",
+        "numpy>=1.19",
+        "pillow",
     ],
     include_package_data=True,
     # To provide executable scripts, use entry points in preference to the

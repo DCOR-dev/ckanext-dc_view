@@ -1,5 +1,0 @@
-dclab>=0.27.11
-dcor_shared>=0.2.0
-matplotlib
-numpy>=1.19
-pillow
