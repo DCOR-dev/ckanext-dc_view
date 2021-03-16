@@ -7,29 +7,42 @@ on:
   - cron: "0 0 1 * *"
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.7', '3.8']
-
+  checks:
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+        python-version: 3.8
+    - name: Install flake8 dependencies
       run: |
         # prerequisites
         python -m pip install --upgrade pip wheel
-        python -m pip install codecov coverage flake8 pytest
-        # install dependencies
-        pip install -e .
-        # show installed packages
-        pip freeze
+        python -m pip install flake8
     - name: Lint with flake8
       run: |
         flake8 .
-
+    - name: Cache vagrant images
+      uses: actions/cache@v2
+      env:
+        cache-name: vagrant-image
+      with:
+        path: ~/.vagrant.d
+        key: macos-build-${{ env.cache-name }}-${{ hashFiles('Vagrantfile') }}
+        restore-keys: |
+          macos-build-${{ env.cache-name }}-
+    - name: save environment variables for codecov in VM
+      run: |
+        env | grep GITHUB > environment.txt
+        cat environment.txt
+    - name: Get the latest box and remove old boxes from the GH Actions cache
+      run: |
+        vagrant box update
+        vagrant box prune
+    - name: Setup vagrant VM
+      run: |
+        vagrant up
+    - name: Run tests in vagrant VM
+      run: |
+        vagrant ssh -- sudo bash /testing/vagrant-run-tests.sh
