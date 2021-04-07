@@ -158,8 +158,8 @@ def overview_plot(rtdc_ds, rtdc_ds_cond=None):
         ii += 1
         pxsize = ds.config["imaging"]["pixel size"]
         ax4.imshow(ds["mask"][EVENT_INDEX],
-                   extent=[0, ds["mask"].shape[2] * pxsize,
-                           0, ds["mask"].shape[1] * pxsize],
+                   extent=[0, ds["mask"][0].shape[1] * pxsize,
+                           0, ds["mask"][0].shape[0] * pxsize],
                    cmap="gray")
         ax4.set_xlabel(u"Detector X [µm]")
         ax4.set_ylabel(u"Detector Y [µm]")
