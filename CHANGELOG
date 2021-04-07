@@ -1,4 +1,6 @@
 0.5.10
+ - fix: only compute an overview plot from the first 5000 events
+   otherwise the background job may timeout
  - ci: fix codecov
 0.5.9
  - tests: use vagrant for tests

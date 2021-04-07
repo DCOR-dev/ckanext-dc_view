@@ -41,15 +41,39 @@ def generate_preview(path_rtdc, path_jpg):
         dsc = None
     # This is the original dataset
     ds = dclab.rtdc_dataset.fmt_hdf5.RTDC_HDF5(path_rtdc)
-    fig = overview_plot(ds, dsc=dsc)
+    fig = overview_plot(rtdc_ds=ds, rtdc_ds_cond=dsc)
     fig.savefig(str(path_jpg), dpi=80)
     plt.close()
 
 
-def overview_plot(ds, dsc=None):
-    """Simple overview plot adapted from the dclab examples"""
-    if dsc is None:
+def overview_plot(rtdc_ds, rtdc_ds_cond=None):
+    """Simple overview plot adapted from the dclab examples
+
+    Parameters
+    ----------
+    rtdc_ds: dclab.rtdc_dataset.core.RTDCBase
+        Full RT-DC dataset to plot
+    rtdc_ds_cond: dclab.rtdc_dataset.core.RTDCBase
+        Condensed version of `ds`
+
+    .. versionchanged:: 0.5.10
+        Only the first 5000 events are plotted for performance reasons
+    """
+    # Only plot the first 5000 events
+    size = min(len(rtdc_ds), 5000)
+    rtdc_ds.filter.manual[:] = False
+    rtdc_ds.filter.manual[:size] = True
+    rtdc_ds.apply_filter()
+    ds = dclab.new_dataset(rtdc_ds)
+
+    if rtdc_ds_cond is None:
         dsc = ds
+    else:
+        rtdc_ds_cond.filter.manual[:] = False
+        rtdc_ds_cond.filter.manual[:size] = True
+        rtdc_ds_cond.apply_filter()
+        dsc = dclab.new_dataset(rtdc_ds_cond)
+
     # Features for scatter plot
     SCATTER_X = "area_um"
     if "bright_avg" in ds:
