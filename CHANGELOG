@@ -1,3 +1,6 @@
+0.5.11
+ - fix: preview image could not be generated if the necessary
+   features are not available
 0.5.10
  - fix: only compute an overview plot from the first 5000 events
    otherwise the background job may timeout (#3)

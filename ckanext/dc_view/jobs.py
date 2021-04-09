@@ -106,6 +106,10 @@ def overview_plot(rtdc_ds, rtdc_ds_cond=None):
 
     fig = plt.figure(figsize=(4, np.sum(height_ratios)*1.5))
 
+    if not numplots:
+        # empty plot
+        return fig
+
     gs = GridSpec(numplots, 1, height_ratios=height_ratios)
     ii = 0
 
