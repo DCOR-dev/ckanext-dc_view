@@ -1,3 +1,6 @@
+0.5.12
+ - fix: generate empty previous image when there is nothing
+   to plot
 0.5.11
  - fix: preview image could not be generated if the necessary
    features are not available
