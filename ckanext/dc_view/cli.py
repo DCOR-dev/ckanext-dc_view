@@ -21,8 +21,9 @@ def run_jobs_dc_view():
         for resource in dataset.resources:
             res_dict = resource.as_dict()
             if jobs.create_preview_job(res_dict, override=False):
-                click.echo("")
-                nl = True
+                if not nl:
+                    click.echo("")
+                    nl = True
                 click.echo(f"Created preview for {resource.name}")
     if not nl:
         click.echo("")
