@@ -44,22 +44,22 @@ class DCViewPlugin(p.SingletonPlugin):
     def after_create(self, context, resource):
         """Generate preview data"""
         if resource.get('mimetype') in DC_MIME_TYPES:
-            jid = "-".join([resource["id"], resource["name"], "preview"])
-            condense_jid = "-".join([resource["id"], resource["name"],
-                                     "condense"])
+            pkg_job_id = f"{resource['package_id']}_{resource['position']}_"
+            jid_preview = pkg_job_id + "preview"
+            jid_condense = pkg_job_id + "condense"
             exts = config.get("ckan.plugins")
             if "dc_serve" in exts:
                 # The dc_serve extension is available, which produces a
                 # condensed dataset. We can use that for plotting.
                 rq_kwargs = {"timeout": 60,
-                             "job_id": jid,
-                             "depends_on": condense_jid}
+                             "job_id": jid_preview,
+                             "depends_on": jid_condense}
                 queue = "dcor-normal"
             else:
                 # The dc_serve extension is NOT available. Creating the preview
                 # image might take longer.
                 rq_kwargs = {"timeout": 1800,
-                             "job_id": jid}
+                             "job_id": jid_preview}
                 queue = "dcor-long"
             toolkit.enqueue_job(create_preview_job,
                                 [resource],

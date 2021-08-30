@@ -1,3 +1,5 @@
+0.5.13
+ - ref: change background job ID to "{package_id}_{position}_preview"
 0.5.12
  - fix: generate empty previous image when there is nothing
    to plot
