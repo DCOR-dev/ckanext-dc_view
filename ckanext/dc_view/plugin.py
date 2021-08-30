@@ -22,7 +22,7 @@ class DCViewPlugin(plugins.SingletonPlugin):
 
     # IBlueprint
     def get_blueprint(self):
-        '''Return a Flask Blueprint object to be registered by the app.'''
+        """"Return a Flask Blueprint object to be registered by the app."""
 
         # Create Blueprint for plugin
         blueprint = Blueprint(self.name, self.__module__)
