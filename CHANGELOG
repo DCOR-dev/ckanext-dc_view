@@ -1,3 +1,5 @@
+0.6.3
+ - fix: typo with new line in CLI
 0.6.2
  - fix: allow KeyvoardInterrup in CLI
 0.6.1

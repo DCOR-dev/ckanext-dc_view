@@ -33,8 +33,8 @@ def run_jobs_dc_view():
             except KeyboardInterrupt:
                 raise
             except BaseException as e:
-                click.echo(
-                    f"{e.__class__.__name__}: {e} for {res_dict['name']}")
+                click_echo(
+                    f"{e.__class__.__name__}: {e} for {res_dict['name']}", nl)
                 nl = True
     if not nl:
         click.echo("")
