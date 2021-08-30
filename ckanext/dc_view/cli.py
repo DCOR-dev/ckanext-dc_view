@@ -6,6 +6,12 @@ import click
 from . import jobs
 
 
+def click_echo(message, am_on_a_new_line):
+    if not am_on_a_new_line:
+        click.echo("")
+    click.echo(message)
+
+
 @click.command()
 def run_jobs_dc_view():
     """Compute preview image for all .rtdc files
@@ -20,11 +26,14 @@ def run_jobs_dc_view():
         click.echo(f"Checking dataset {dataset.id}\r", nl=False)
         for resource in dataset.resources:
             res_dict = resource.as_dict()
-            if jobs.create_preview_job(res_dict, override=False):
-                if not nl:
-                    click.echo("")
+            try:
+                if jobs.create_preview_job(res_dict, override=False):
+                    click_echo(f"Created preview for {resource.name}", nl)
                     nl = True
-                click.echo(f"Created preview for {resource.name}")
+            except BaseException as e:
+                click.echo(
+                    f"{e.__class__.__name__}: {e} for {res_dict['name']}")
+                nl = True
     if not nl:
         click.echo("")
     click.echo("Done!")
