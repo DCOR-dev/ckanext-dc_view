@@ -30,6 +30,8 @@ def run_jobs_dc_view():
                 if jobs.create_preview_job(res_dict, override=False):
                     click_echo(f"Created preview for {resource.name}", nl)
                     nl = True
+            except KeyboardInterrupt:
+                raise
             except BaseException as e:
                 click.echo(
                     f"{e.__class__.__name__}: {e} for {res_dict['name']}")

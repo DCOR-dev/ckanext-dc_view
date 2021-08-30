@@ -1,3 +1,5 @@
+0.6.2
+ - fix: allow KeyvoardInterrup in CLI
 0.6.1
  - fix: catch and print errors in "run-jobs-dc_view"
 0.6.0
