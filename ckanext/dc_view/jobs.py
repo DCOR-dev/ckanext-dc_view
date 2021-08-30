@@ -29,6 +29,8 @@ def create_preview_job(resource, override=False):
         jpgpath = path.with_name(path.name + "_preview.jpg")
         if not jpgpath.exists() or override:
             generate_preview(path, jpgpath)
+            return True
+    return False
 
 
 def generate_preview(path_rtdc, path_jpg):

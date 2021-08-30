@@ -2,21 +2,23 @@ from flask import Blueprint
 from ckan.common import config
 import ckan.lib.datapreview as datapreview
 import ckan.plugins.toolkit as toolkit
-import ckan.plugins as p
+import ckan.plugins as plugins
 
 from dcor_shared import DC_MIME_TYPES
 
+from .cli import get_commands
 from .jobs import create_preview_job
 from .meta import render_metadata_html
 from .route_funcs import dcpreview
 
 
-class DCViewPlugin(p.SingletonPlugin):
-    '''DC data view and route for *_preview.png'''
-    p.implements(p.IBlueprint)
-    p.implements(p.IConfigurer, inherit=True)
-    p.implements(p.IResourceController, inherit=True)
-    p.implements(p.IResourceView, inherit=True)
+class DCViewPlugin(plugins.SingletonPlugin):
+    """DC data view and route for *_preview.png"""
+    plugins.implements(plugins.IBlueprint)
+    plugins.implements(plugins.IClick)
+    plugins.implements(plugins.IConfigurer, inherit=True)
+    plugins.implements(plugins.IResourceController, inherit=True)
+    plugins.implements(plugins.IResourceView, inherit=True)
 
     # IBlueprint
     def get_blueprint(self):
@@ -35,10 +37,14 @@ class DCViewPlugin(p.SingletonPlugin):
             blueprint.add_url_rule(*rule)
         return blueprint
 
+    # IClick
+    def get_commands(self):
+        return get_commands()
+
     # IConfigurer
     def update_config(self, config):
-        p.toolkit.add_template_directory(config, 'templates')
-        p.toolkit.add_resource('assets', 'dc_view')
+        plugins.toolkit.add_template_directory(config, 'templates')
+        plugins.toolkit.add_resource('assets', 'dc_view')
 
     # IResourceController
     def after_create(self, context, resource):
@@ -70,11 +76,11 @@ class DCViewPlugin(p.SingletonPlugin):
     # IResourceView
     def info(self):
         return {'name': 'dc_view',
-                'title': p.toolkit._('DC Info'),
+                'title': plugins.toolkit._('DC Info'),
                 'icon': 'microscope',
                 'iframed': False,
                 'always_available': True,
-                'default_title': p.toolkit._('DC Info'),
+                'default_title': plugins.toolkit._('DC Info'),
                 }
 
     def can_view(self, data_dict):

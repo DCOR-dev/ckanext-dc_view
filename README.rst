@@ -17,6 +17,11 @@ This extensione implements:
   "/dataset/{id}/resource/{resource_id}/preview.jpg"
 
 
+- CLI:
+
+  - add CKAN command `run-jobs-dc-view` that runs all background
+    jobs for all resources (if not already done)
+
 Installation
 ------------
 
