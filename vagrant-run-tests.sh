@@ -6,6 +6,8 @@ export CKAN_INI=/etc/ckan/default/test-dcor.ini
 cd "$(dirname "${BASH_SOURCE[0]}")"
 # Source the CKAN environment
 source /usr/lib/ckan/default/bin/activate
+# Update pip
+pip install --upgrade pip wheel
 # Update all DCOR extensions
 dcor update --yes
 # Install the current package in editable mode for testing
