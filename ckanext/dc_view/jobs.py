@@ -77,21 +77,17 @@ def overview_plot(rtdc_ds, rtdc_ds_cond=None):
         dsc = dclab.new_dataset(rtdc_ds_cond)
 
     # Features for scatter plot
-    SCATTER_X = "area_um"
-    if "bright_avg" in ds:
-        SCATTER_Y = "bright_avg"
-        ylabel = "Brightness [a.u]"
-    else:
-        SCATTER_Y = "deform"
-        ylabel = dclab.dfn.get_feature_label(SCATTER_Y, rtdc_ds=ds)
+    scatter_x = "area_um"
+    scatter_y = "deform"
     # Event index to display
-    EVENT_INDEX = min(len(ds)-1, 47)
+    event_index = min(len(ds)-1, 47)
 
-    xlabel = dclab.dfn.get_feature_label(SCATTER_X, rtdc_ds=ds)
+    xlabel = dclab.dfn.get_feature_label(scatter_x, rtdc_ds=ds)
+    ylabel = dclab.dfn.get_feature_label(scatter_y, rtdc_ds=ds)
 
     plots = OrderedDict()
-    plots["scatter_basic"] = SCATTER_X in ds and SCATTER_Y in ds
-    plots["scatter_kde"] = SCATTER_X in ds and SCATTER_Y in ds
+    plots["scatter_basic"] = scatter_x in ds and scatter_y in ds
+    plots["scatter_kde"] = scatter_x in ds and scatter_y in ds
     plots["image"] = "image" in ds
     plots["mask"] = "mask" in ds
     plots["trace"] = "trace" in ds
@@ -116,16 +112,16 @@ def overview_plot(rtdc_ds, rtdc_ds_cond=None):
     gs = GridSpec(numplots, 1, height_ratios=height_ratios)
     ii = 0
 
-    if SCATTER_X in ds and SCATTER_Y in ds:
+    if scatter_x in ds and scatter_y in ds:
         ax1 = fig.add_subplot(gs[ii])
         ax1.set_title("Basic scatter plot")
         ii += 1
-        x_start = np.percentile(dsc[SCATTER_X], 1)
-        x_end = np.percentile(dsc[SCATTER_X], 99)
-        y_start = np.percentile(dsc[SCATTER_Y], 1)
-        y_end = np.percentile(dsc[SCATTER_Y], 99)
+        x_start = np.percentile(dsc[scatter_x], 1)
+        x_end = np.percentile(dsc[scatter_x], 99)
+        y_start = np.percentile(dsc[scatter_y], 1)
+        y_end = np.percentile(dsc[scatter_y], 99)
 
-        ax1.plot(dsc[SCATTER_X], dsc[SCATTER_Y],
+        ax1.plot(dsc[scatter_x], dsc[scatter_y],
                  "o", color="k", alpha=.2, ms=1)
         ax1.set_xlabel(xlabel)
         ax1.set_ylabel(ylabel)
@@ -135,9 +131,9 @@ def overview_plot(rtdc_ds, rtdc_ds_cond=None):
         ax2 = fig.add_subplot(gs[ii])
         ax2.set_title("KDE scatter plot")
         ii += 1
-        sc = ax2.scatter(dsc[SCATTER_X], dsc[SCATTER_Y],
-                         c=ds.get_kde_scatter(xax=SCATTER_X,
-                                              yax=SCATTER_Y,
+        sc = ax2.scatter(dsc[scatter_x], dsc[scatter_y],
+                         c=ds.get_kde_scatter(xax=scatter_x,
+                                              yax=scatter_y,
                                               kde_type="histogram"),
                          s=3)
         plt.colorbar(sc, label="kernel density [a.u]", ax=ax2)
@@ -150,13 +146,13 @@ def overview_plot(rtdc_ds, rtdc_ds_cond=None):
         ax3 = fig.add_subplot(gs[ii])
         ax3.set_title("Event image with contour")
         ii += 1
-        ax3.imshow(ds["image"][EVENT_INDEX], cmap="gray")
+        ax3.imshow(ds["image"][event_index], cmap="gray")
         ax3.set_xlabel("Detector X [px]")
         ax3.set_ylabel("Detector Y [px]")
 
         if "contour" in ds:
-            ax3.plot(ds["contour"][EVENT_INDEX][:, 0],
-                     ds["contour"][EVENT_INDEX][:, 1],
+            ax3.plot(ds["contour"][event_index][:, 0],
+                     ds["contour"][event_index][:, 1],
                      c="r")
 
     if "mask" in ds:
@@ -164,7 +160,7 @@ def overview_plot(rtdc_ds, rtdc_ds_cond=None):
         ax4.set_title("Event mask")
         ii += 1
         pxsize = ds.config["imaging"]["pixel size"]
-        ax4.imshow(ds["mask"][EVENT_INDEX],
+        ax4.imshow(ds["mask"][event_index],
                    extent=[0, ds["mask"][0].shape[1] * pxsize,
                            0, ds["mask"][0].shape[0] * pxsize],
                    cmap="gray")
@@ -179,13 +175,13 @@ def overview_plot(rtdc_ds, rtdc_ds_cond=None):
         flrate = ds.config["fluorescence"]["sample rate"]
         fltime = np.arange(flsamples) / flrate * 1e6
         if "fl1_raw" in ds["trace"]:
-            ax5.plot(fltime, ds["trace"]["fl1_raw"][EVENT_INDEX],
+            ax5.plot(fltime, ds["trace"]["fl1_raw"][event_index],
                      c="#15BF00", label="fl1_raw")
         if "fl2_raw" in ds["trace"]:
-            ax5.plot(fltime, ds["trace"]["fl2_raw"][EVENT_INDEX],
+            ax5.plot(fltime, ds["trace"]["fl2_raw"][event_index],
                      c="#BF8A00", label="fl2_raw")
         if "fl3_raw" in ds["trace"]:
-            ax5.plot(fltime, ds["trace"]["fl3_raw"][EVENT_INDEX],
+            ax5.plot(fltime, ds["trace"]["fl3_raw"][event_index],
                      c="#BF0C00", label="fl3_raw")
         ax5.legend()
         ax5.set_xlabel(u"Event time [µs]")

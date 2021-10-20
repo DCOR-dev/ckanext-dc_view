@@ -12,9 +12,11 @@ def click_echo(message, am_on_a_new_line):
     click.echo(message)
 
 
+@click.option('--force', help="Regenerate preview for all resources",
+              is_flag=True)
 @click.command()
-def run_jobs_dc_view():
-    """Compute preview image for all .rtdc files
+def run_jobs_dc_view(force=False):
+    """Generate preview image for all RT-DC resources
 
     This also happens for draft datasets.
     """
@@ -27,7 +29,7 @@ def run_jobs_dc_view():
         for resource in dataset.resources:
             res_dict = resource.as_dict()
             try:
-                if jobs.create_preview_job(res_dict, override=False):
+                if jobs.create_preview_job(res_dict, override=force):
                     click_echo(f"Created preview for {resource.name}", nl)
                     nl = True
             except KeyboardInterrupt:
