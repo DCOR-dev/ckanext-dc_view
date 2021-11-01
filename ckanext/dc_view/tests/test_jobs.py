@@ -36,7 +36,7 @@ def synchronous_enqueue_job(job_func, args=None, kwargs=None, title=None,
 
 # We need the dcor_depot extension to make sure that the symbolic-
 # linking pipeline is used.
-@pytest.mark.ckan_config('ckan.plugins', 'dcor_schemas dcor_depot dc_view')
+@pytest.mark.ckan_config('ckan.plugins', 'dcor_depot dcor_schemas dc_view')
 @pytest.mark.usefixtures('clean_db', 'with_request_context')
 @mock.patch('ckan.plugins.toolkit.enqueue_job',
             side_effect=synchronous_enqueue_job)
