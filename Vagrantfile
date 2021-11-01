@@ -71,4 +71,8 @@ Vagrant.configure("2") do |config|
   #   apt-get update
   #   apt-get install -y apache2
   # SHELL
+
+  # Prevent reinstallation of guest additinos on every vagrant up
+  # (Uncomment the next line in your CI tests)
+  config.vbguest.auto_update = false
 end

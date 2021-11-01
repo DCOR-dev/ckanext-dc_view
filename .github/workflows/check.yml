@@ -3,8 +3,6 @@ name: Checks
 on:
   push:
   pull_request:
-  schedule:
-  - cron: "0 0 1 * *"
 
 jobs:
   checks:
@@ -42,6 +40,7 @@ jobs:
         vagrant box prune
     - name: Setup vagrant VM
       run: |
+        vagrant plugin install vagrant-vbguest
         vagrant up
     - name: Run tests in vagrant VM
       run: |
