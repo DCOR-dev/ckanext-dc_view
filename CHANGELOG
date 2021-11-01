@@ -1,3 +1,5 @@
+0.6.5
+ - maintenance release
 0.6.4
  - enh: switch to deformation vs. area plots in previews (#4)
  - enh: allow to regenerate all preview images using the CLI
