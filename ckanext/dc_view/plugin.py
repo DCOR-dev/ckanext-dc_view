@@ -1,6 +1,7 @@
 from flask import Blueprint
 from ckan.common import config
 import ckan.lib.datapreview as datapreview
+from ckan.lib.jobs import _connect as ckan_redis_connect
 import ckan.plugins.toolkit as toolkit
 import ckan.plugins as plugins
 
@@ -68,7 +69,7 @@ class DCViewPlugin(plugins.SingletonPlugin):
                 rq_kwargs = {"timeout": 1800,
                              "job_id": jid_preview}
                 queue = "dcor-long"
-            if not Job.exists(jid_preview):
+            if not Job.exists(jid_preview, connection=ckan_redis_connect()):
                 toolkit.enqueue_job(create_preview_job,
                                     [resource],
                                     title="Create resource preview image",
