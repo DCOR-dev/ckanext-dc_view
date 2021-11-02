@@ -5,6 +5,7 @@ import ckan.plugins.toolkit as toolkit
 import ckan.plugins as plugins
 
 from dcor_shared import DC_MIME_TYPES
+from rq.job import Job
 
 from .cli import get_commands
 from .jobs import create_preview_job
@@ -57,21 +58,22 @@ class DCViewPlugin(plugins.SingletonPlugin):
             if "dc_serve" in exts:
                 # The dc_serve extension is available, which produces a
                 # condensed dataset. We can use that for plotting.
-                rq_kwargs = {"timeout": 60,
+                rq_kwargs = {"timeout": 500,
                              "job_id": jid_preview,
                              "depends_on": jid_condense}
-                queue = "dcor-normal"
+                queue = "dcor-short"
             else:
                 # The dc_serve extension is NOT available. Creating the preview
                 # image might take longer.
                 rq_kwargs = {"timeout": 1800,
                              "job_id": jid_preview}
                 queue = "dcor-long"
-            toolkit.enqueue_job(create_preview_job,
-                                [resource],
-                                title="Create resource preview image",
-                                queue=queue,
-                                rq_kwargs=rq_kwargs)
+            if not Job.exists(jid_preview):
+                toolkit.enqueue_job(create_preview_job,
+                                    [resource],
+                                    title="Create resource preview image",
+                                    queue=queue,
+                                    rq_kwargs=rq_kwargs)
 
     # IResourceView
     def info(self):
