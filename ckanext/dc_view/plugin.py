@@ -1,3 +1,5 @@
+import copy
+
 from flask import Blueprint
 from ckan.common import config
 import ckan.lib.datapreview as datapreview
@@ -53,28 +55,24 @@ class DCViewPlugin(plugins.SingletonPlugin):
         """Generate preview data"""
         if resource.get('mimetype') in DC_MIME_TYPES:
             pkg_job_id = f"{resource['package_id']}_{resource['position']}_"
+            depends_on = []
+            extensions = [config.get("ckan.plugins")]
+            # Are we waiting for symlinking (ckanext-dcor_depot)?
+            # (This makes wait_for_resource really fast ;)
+            if "dcor_depot" in extensions:
+                # Wait for the resource to be moved to the depot.
+                jid_sl = pkg_job_id + "symlink"
+                depends_on.append(jid_sl)
             jid_preview = pkg_job_id + "preview"
-            jid_condense = pkg_job_id + "condense"
-            exts = config.get("ckan.plugins")
-            if "dc_serve" in exts:
-                # The dc_serve extension is available, which produces a
-                # condensed dataset. We can use that for plotting.
-                rq_kwargs = {"timeout": 500,
-                             "job_id": jid_preview,
-                             "depends_on": jid_condense}
-                queue = "dcor-short"
-            else:
-                # The dc_serve extension is NOT available. Creating the preview
-                # image might take longer.
-                rq_kwargs = {"timeout": 1800,
-                             "job_id": jid_preview}
-                queue = "dcor-long"
             if not Job.exists(jid_preview, connection=ckan_redis_connect()):
                 toolkit.enqueue_job(create_preview_job,
                                     [resource],
                                     title="Create resource preview image",
-                                    queue=queue,
-                                    rq_kwargs=rq_kwargs)
+                                    queue="dcor-normal",
+                                    rq_kwargs={
+                                        "timeout": 3600,
+                                        "job_id": jid_preview,
+                                        "depends_on": copy.copy(depends_on)})
 
     # IResourceView
     def info(self):

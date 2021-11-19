@@ -1,3 +1,5 @@
+0.6.9
+ - enh: do not queue preview generation after condensing task
 0.6.8
  - enh: add --modified-days argument to "run-jobs-dc_view" CLI
 0.6.7
