@@ -51,7 +51,7 @@ class DCViewPlugin(plugins.SingletonPlugin):
         plugins.toolkit.add_resource('assets', 'dc_view')
 
     # IResourceController
-    def after_create(self, context, resource):
+    def after_resource_create(self, context, resource):
         """Generate preview data"""
         if resource.get('mimetype') in DC_MIME_TYPES:
             pkg_job_id = f"{resource['package_id']}_{resource['position']}_"
