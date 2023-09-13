@@ -1,7 +1,7 @@
 set -e
 set -x
 # Set CKAN_INI to testing
-export CKAN_INI=/etc/ckan/default/test-dcor.ini
+export CKAN_INI=/etc/ckan/default/ckan.ini
 # Go to the directory of this script
 cd "$(dirname "${BASH_SOURCE[0]}")"
 # Source the CKAN environment
