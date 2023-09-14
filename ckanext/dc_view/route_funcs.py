@@ -11,7 +11,12 @@ import ckan.plugins.toolkit as toolkit
 def dcpreview(id, resource_id):
     """Serve a preview image on disk
 
-    `id` and `resource_id` are strings or uuids.
+    Parameters
+    ----------
+    id: str
+        dataset ID
+    resource_id: str
+        resource ID for which to return the preview image
     """
     # Code borrowed from ckan/controllers/package.py:resource_download
     context = {'model': model, 'session': model.Session,
@@ -23,14 +28,14 @@ def dcpreview(id, resource_id):
         toolkit.get_action('package_show')(context, {'id': id})
     except (logic.NotFound, logic.NotAuthorized):
         toolkit.abort(404, toolkit._('Resource not found'))
-
-    if rsc.get('url_type') == 'upload':
-        upload = uploader.get_resource_uploader(rsc)
-        filepath = pathlib.Path(upload.get_path(rsc['id']))
-        jpg_file = filepath.with_name(filepath.name + "_preview.jpg")
-        if not jpg_file.exists():
-            toolkit.abort(404, toolkit._('Preview not found'))
-        return flask.send_from_directory(jpg_file.parent, jpg_file.name)
-    elif 'url' not in rsc:
-        toolkit.abort(404, toolkit._('No download is available'))
-    toolkit.redirect_to(rsc['url'])
+    else:
+        if rsc.get('url_type') == 'upload':
+            upload = uploader.get_resource_uploader(rsc)
+            filepath = pathlib.Path(upload.get_path(rsc['id']))
+            jpg_file = filepath.with_name(filepath.name + "_preview.jpg")
+            if not jpg_file.exists():
+                toolkit.abort(404, toolkit._('Preview not found'))
+            return flask.send_from_directory(jpg_file.parent, jpg_file.name)
+        elif 'url' not in rsc:
+            toolkit.abort(404, toolkit._('No download is available'))
+        toolkit.redirect_to(rsc['url'])
