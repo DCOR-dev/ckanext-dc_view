@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+# only allow one job to run
+concurrency: general_workflow
+
 jobs:
   checks:
     runs-on: macos-latest
@@ -20,9 +23,9 @@ jobs:
         python -m pip install flake8
     - name: Lint with flake8
       run: |
-        flake8 .
+        flake8 --exclude _version.py .
     - name: Cache vagrant images
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       env:
         cache-name: vagrant-image
       with:
