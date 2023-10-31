@@ -4,8 +4,11 @@ import os
 import shutil
 import tempfile
 
+import ckan.plugins.toolkit as toolkit
 import dclab
-from dcor_shared import DC_MIME_TYPES, get_resource_path, wait_for_resource
+from dcor_shared import (
+    DC_MIME_TYPES, s3, sha256sum, get_ckan_config_option, get_resource_path,
+    wait_for_resource)
 import numpy as np
 
 # Create a temporary matplotlib config directory which is removed on exit
@@ -17,6 +20,10 @@ from matplotlib.gridspec import GridSpec  # noqa: E402
 import matplotlib  # noqa: E402
 matplotlib.use('agg')
 import matplotlib.pylab as plt  # noqa: E402
+
+
+def admin_context():
+    return {'ignore_auth': True, 'user': 'default'}
 
 
 def create_preview_job(resource, override=False):
@@ -31,6 +38,28 @@ def create_preview_job(resource, override=False):
             generate_preview(path, jpgpath)
             return True
     return False
+
+
+def migrate_preview_to_s3_job(resource):
+    """Migrate a preview image to the S3 object store"""
+    path = get_resource_path(resource["id"])
+    path_prev = path.with_name(path.name + "_preview.jpg")
+    ds_dict = toolkit.get_action('package_show')(
+        admin_context(),
+        {'id': resource["package_id"]})
+    # Perform the upload
+    bucket_name = get_ckan_config_option(
+        "dcor_object_store.bucket_name").format(
+        organization_id=ds_dict["organization"]["id"])
+    rid = resource["id"]
+    sha256 = sha256sum(path_prev)
+    s3.upload_file(
+        bucket_name=bucket_name,
+        object_name=f"preview/{rid[:3]}/{rid[3:6]}/{rid[6:]}",
+        path=path_prev,
+        sha256=sha256,
+        private=ds_dict["private"])
+    # TODO: delete the local resource after successful upload?
 
 
 def generate_preview(path_rtdc, path_jpg):

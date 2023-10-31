@@ -7,11 +7,11 @@ from ckan.lib.jobs import _connect as ckan_redis_connect
 import ckan.plugins.toolkit as toolkit
 import ckan.plugins as plugins
 
-from dcor_shared import DC_MIME_TYPES
+from dcor_shared import DC_MIME_TYPES, s3
 from rq.job import Job
 
 from .cli import get_commands
-from .jobs import create_preview_job
+from .jobs import create_preview_job, migrate_preview_to_s3_job
 from .meta import render_metadata_html
 from .route_funcs import dcpreview
 
@@ -33,7 +33,7 @@ class DCViewPlugin(plugins.SingletonPlugin):
 
         # Add plugin url rules to Blueprint object
         rules = [
-            ('/dataset/<uuid:id>/resource/<uuid:resource_id>/preview.jpg',
+            ('/dataset/<uuid:ds_id>/resource/<uuid:res_id>/preview.jpg',
              'dcpreview',
              dcpreview),
         ]
@@ -73,6 +73,19 @@ class DCViewPlugin(plugins.SingletonPlugin):
                                         "timeout": 3600,
                                         "job_id": jid_preview,
                                         "depends_on": copy.copy(depends_on)})
+
+            # Upload the condensed dataset to S3
+            if s3.is_available():
+                jid_condensed_s3 = pkg_job_id + "previews3"
+                toolkit.enqueue_job(
+                    migrate_preview_to_s3_job,
+                    [resource],
+                    title="Migrate preview image to S3 object store",
+                    queue="dcor-normal",
+                    rq_kwargs={"timeout": 1000,
+                               "job_id": jid_condensed_s3,
+                               "depends_on": [jid_preview]}
+                    )
 
     # IResourceView
     def info(self):

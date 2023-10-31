@@ -12,6 +12,7 @@ import pathlib
 import time
 
 import pytest
+import requests
 
 import ckan.lib
 import ckan.tests.factories as factories
@@ -63,7 +64,8 @@ def test_create_preview_job(enqueue_job_mock, create_with_upload, monkeypatch,
     # create 1st dataset
     create_context = {'ignore_auth': False, 'user': user['name'],
                       'api_version': 3}
-    dataset = make_dataset(create_context, owner_org, with_resource=False,
+    dataset = make_dataset(create_context,
+                           owner_org,
                            activate=False)
     path = data_dir / "calibration_beads_47.rtdc"
     content = path.read_bytes()
@@ -85,3 +87,55 @@ def test_create_preview_job(enqueue_job_mock, create_with_upload, monkeypatch,
             break
     else:
         raise ValueError("Preview generation timed out after 10s!")
+
+
+# We need the dcor_depot extension to make sure that the symbolic-
+# linking pipeline is used.
+@pytest.mark.ckan_config('ckan.plugins', 'dcor_depot dc_view dcor_schemas')
+@pytest.mark.usefixtures('clean_db', 'with_request_context')
+@mock.patch('ckan.plugins.toolkit.enqueue_job',
+            side_effect=synchronous_enqueue_job)
+def test_upload_preview_dataset_to_s3_job(
+        enqueue_job_mock, create_with_upload, monkeypatch, ckan_config,
+        tmpdir):
+    monkeypatch.setitem(ckan_config, 'ckan.storage_path', str(tmpdir))
+    monkeypatch.setattr(ckan.lib.uploader,
+                        'get_storage_path',
+                        lambda: str(tmpdir))
+    monkeypatch.setattr(
+        ckanext.dcor_schemas.plugin,
+        'DISABLE_AFTER_DATASET_CREATE_FOR_CONCURRENT_JOB_TESTS',
+        True)
+
+    user = factories.User()
+    owner_org = factories.Organization(users=[{
+        'name': user['id'],
+        'capacity': 'admin'
+    }])
+    # Note: `call_action` bypasses authorization!
+    # create 1st dataset
+    create_context = {'ignore_auth': False,
+                      'user': user['name'],
+                      'api_version': 3}
+    ds_dict, res_dict = make_dataset(create_context,
+                                     owner_org,
+                                     create_with_upload=create_with_upload,
+                                     activate=True)
+    bucket_name = dcor_shared.get_ckan_config_option(
+        "dcor_object_store.bucket_name").format(
+        organization_id=ds_dict["organization"]["id"])
+    rid = res_dict["id"]
+    object_name = f"preview/{rid[:3]}/{rid[3:6]}/{rid[6:]}"
+    endpoint = dcor_shared.get_ckan_config_option(
+        "dcor_object_store.endpoint_url")
+    prev_url = f"{endpoint}/{bucket_name}/{object_name}"
+    response = requests.get(prev_url)
+    assert response.ok, "resource is public"
+    assert response.status_code == 200
+    # Verify SHA256sum
+    path = dcor_shared.get_resource_path(res_dict["id"])
+    path_prev = path.with_name(path.name + "_preview.jpg")
+    dl_path = tmpdir / "prev_image.jpg"
+    with dl_path.open("wb") as fd:
+        fd.write(response.content)
+    assert dcor_shared.sha256sum(dl_path) == dcor_shared.sha256sum(path_prev)

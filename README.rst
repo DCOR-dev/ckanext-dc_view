@@ -13,6 +13,7 @@ This extensione implements:
 
 - A default view for RT-DC (mimetype) resources
 - A background job that generates the preview image
+- A background job that uploads preview images to the S3 object store
 - A route that makes the preview image available via
   "/dataset/{id}/resource/{resource_id}/preview.jpg"
 
@@ -40,14 +41,7 @@ Add this extension to the plugins and defaul_views in ckan.ini:
 
 Testing
 -------
-If CKAN/DCOR is installed and setup for testing, this extension can
-be tested with pytest:
-
-::
-
-    pytest ckanext
-
-Testing can also be done via vagrant in a virtualmachine using the
+Testing can be done via vagrant in a virtual machine using the
 `dcor-test <https://app.vagrantup.com/paulmueller/boxes/dcor-test/>` image.
 Make sure that `vagrant` and `virtualbox` are installed and run the
 following commands in the root of this repository:
