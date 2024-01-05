@@ -42,7 +42,7 @@ setup(
     namespace_packages=['ckanext'],
     install_requires=[
         # the "ckan" dependency is implied
-        "dclab>=0.52.0",
+        "dclab>=0.57.0",
         "dcor_shared>=0.5.3",
         "matplotlib",
         "numpy>=1.19",

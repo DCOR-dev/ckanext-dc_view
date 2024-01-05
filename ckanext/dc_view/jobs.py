@@ -6,6 +6,7 @@ import tempfile
 
 import ckan.plugins.toolkit as toolkit
 import dclab
+from dclab.rtdc_dataset import linker
 from dcor_shared import (
     DC_MIME_TYPES, s3, sha256sum, get_ckan_config_option, get_resource_path,
     wait_for_resource)
@@ -64,31 +65,39 @@ def migrate_preview_to_s3_job(resource):
 
 def generate_preview(path_rtdc, path_jpg):
     # Check whether we have a condensed version of the dataset.
-    # If so, also pass that to overview_plot.
+    # If so, include that in the overview plot.
+    paths = []
     path_condensed = path_rtdc.with_name(path_rtdc.name + "_condensed.rtdc")
     if path_condensed.exists():
-        dsc = dclab.rtdc_dataset.fmt_hdf5.RTDC_HDF5(path_condensed)
-    else:
-        dsc = None
-    # This is the original dataset
-    ds = dclab.rtdc_dataset.fmt_hdf5.RTDC_HDF5(path_rtdc)
-    fig = overview_plot(rtdc_ds=ds, rtdc_ds_cond=dsc)
-    fig.savefig(str(path_jpg), dpi=80)
-    plt.close()
+        paths.append(path_condensed)
+    paths.append(path_rtdc)
+    # We create a linked HDF5 file which includes all paths.
+    with linker.combine_h5files(paths, external="raise") as fd:
+        # We do not enable basins, because it is time-consuming.
+        ds = dclab.rtdc_dataset.fmt_hdf5.RTDC_HDF5(fd, enable_basins=False)
+        # This is the original dataset
+        fig = overview_plot(rtdc_ds=ds)
+        fig.savefig(str(path_jpg), dpi=80)
+        plt.close()
 
 
-def overview_plot(rtdc_ds, rtdc_ds_cond=None):
+def overview_plot(rtdc_ds):
     """Simple overview plot adapted from the dclab examples
 
     Parameters
     ----------
     rtdc_ds: dclab.rtdc_dataset.core.RTDCBase
         Full RT-DC dataset to plot
-    rtdc_ds_cond: dclab.rtdc_dataset.core.RTDCBase
-        Condensed version of `ds`
 
     .. versionchanged:: 0.5.10
+
         Only the first 5000 events are plotted for performance reasons
+
+    .. verionchanged:: 0.8.1
+
+        Removed `rtdc_ds_cond` argument, since we are now working
+        with linked datasets.
+
     """
     # Only plot the first 5000 events
     size = min(len(rtdc_ds), 5000)
@@ -96,14 +105,6 @@ def overview_plot(rtdc_ds, rtdc_ds_cond=None):
     rtdc_ds.filter.manual[:size] = True
     rtdc_ds.apply_filter()
     ds = dclab.new_dataset(rtdc_ds)
-
-    if rtdc_ds_cond is None:
-        dsc = ds
-    else:
-        rtdc_ds_cond.filter.manual[:] = False
-        rtdc_ds_cond.filter.manual[:size] = True
-        rtdc_ds_cond.apply_filter()
-        dsc = dclab.new_dataset(rtdc_ds_cond)
 
     # Features for scatter plot
     scatter_x = "area_um"
@@ -145,12 +146,12 @@ def overview_plot(rtdc_ds, rtdc_ds_cond=None):
         ax1 = fig.add_subplot(gs[ii])
         ax1.set_title("Basic scatter plot")
         ii += 1
-        x_start = np.percentile(dsc[scatter_x], 1)
-        x_end = np.percentile(dsc[scatter_x], 99)
-        y_start = np.percentile(dsc[scatter_y], 1)
-        y_end = np.percentile(dsc[scatter_y], 99)
+        x_start = np.percentile(ds[scatter_x], 1)
+        x_end = np.percentile(ds[scatter_x], 99)
+        y_start = np.percentile(ds[scatter_y], 1)
+        y_end = np.percentile(ds[scatter_y], 99)
 
-        ax1.plot(dsc[scatter_x], dsc[scatter_y],
+        ax1.plot(ds[scatter_x], ds[scatter_y],
                  "o", color="k", alpha=.2, ms=1)
         ax1.set_xlabel(xlabel)
         ax1.set_ylabel(ylabel)
@@ -160,7 +161,7 @@ def overview_plot(rtdc_ds, rtdc_ds_cond=None):
         ax2 = fig.add_subplot(gs[ii])
         ax2.set_title("KDE scatter plot")
         ii += 1
-        sc = ax2.scatter(dsc[scatter_x], dsc[scatter_y],
+        sc = ax2.scatter(ds[scatter_x], ds[scatter_y],
                          c=ds.get_kde_scatter(xax=scatter_x,
                                               yax=scatter_y,
                                               kde_type="histogram"),
@@ -190,8 +191,8 @@ def overview_plot(rtdc_ds, rtdc_ds_cond=None):
         ii += 1
         pxsize = ds.config["imaging"]["pixel size"]
         ax4.imshow(ds["mask"][event_index],
-                   extent=[0, ds["mask"][0].shape[1] * pxsize,
-                           0, ds["mask"][0].shape[0] * pxsize],
+                   extent=(0, ds["mask"][0].shape[1] * pxsize,
+                           0, ds["mask"][0].shape[0] * pxsize),
                    cmap="gray")
         ax4.set_xlabel(u"Detector X [µm]")
         ax4.set_ylabel(u"Detector Y [µm]")
