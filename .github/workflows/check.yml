@@ -43,7 +43,6 @@ jobs:
         vagrant box prune
     - name: Setup vagrant VM
       run: |
-        vagrant plugin install vagrant-vbguest
         vagrant up
     - name: Run tests in vagrant VM
       run: |
