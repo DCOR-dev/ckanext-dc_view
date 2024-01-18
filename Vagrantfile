@@ -44,7 +44,7 @@ Vagrant.configure("2") do |config|
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
   # config.vm.synced_folder "../data", "/vagrant_data"
-  config.vm.synced_folder ".", "/vagrant", disabled: true
+  # config.vm.synced_folder ".", "/vagrant", disabled: true
   config.vm.synced_folder ".", "/testing", type: "rsync",
     rsync__args: ["-vzra", "--delete"],
     rsync__exclude: ["*.pyc", "__pycache__"],
@@ -68,5 +68,5 @@ Vagrant.configure("2") do |config|
 
   # Prevent reinstallation of guest additinos on every vagrant up
   # (Uncomment the next line in your CI tests)
-  config.vbguest.auto_update = false
+  # config.vbguest.auto_update = false
 end
