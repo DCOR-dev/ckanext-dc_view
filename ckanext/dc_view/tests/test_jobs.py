@@ -7,7 +7,7 @@ A common approach is to use the mock package to replace the
 ckan.plugins.toolkit.enqueue_job function with a mock that executes jobs
 synchronously instead of asynchronously
 """
-import mock
+from unittest import mock
 import pathlib
 import time
 
