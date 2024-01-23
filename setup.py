@@ -43,7 +43,7 @@ setup(
     install_requires=[
         # the "ckan" dependency is implied
         "dclab>=0.57.0",
-        "dcor_shared>=0.5.3",
+        "dcor_shared>=0.6.0",
         "matplotlib",
         "numpy>=1.19",
         "pillow",

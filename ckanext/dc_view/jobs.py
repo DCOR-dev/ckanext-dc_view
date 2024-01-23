@@ -30,7 +30,7 @@ def admin_context():
 def create_preview_job(resource, override=False):
     """Generate a *_preview.png file for a DC resource"""
     path = get_resource_path(resource["id"])
-    wait_for_resource(path)
+    wait_for_resource(resource["id"])
     mtype = resource.get('mimetype', '')
     if mtype in DC_MIME_TYPES:
         # only do this for rtdc data
