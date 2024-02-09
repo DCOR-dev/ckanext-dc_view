@@ -8,7 +8,7 @@ import ckan.model as model
 import ckan.plugins.toolkit as toolkit
 
 import botocore.exceptions
-from dcor_shared import get_ckan_config_option, s3
+from dcor_shared import s3, s3cc
 
 
 def dcpreview(ds_id, res_id):
@@ -38,11 +38,9 @@ def dcpreview(ds_id, res_id):
     prev_name = f"{res_stem}_preview.jpg"
 
     if s3 is not None and res_dict.get('s3_available'):
-        # check if the corresponding S3 object exists
-        bucket_name = get_ckan_config_option(
-            "dcor_object_store.bucket_name").format(
-            organization_id=ds_dict["organization"]["id"])
-        object_name = f"preview/{rid[:3]}/{rid[3:6]}/{rid[6:]}"
+        # check if the corresponding S3 object
+        bucket_name, object_name = s3cc.get_s3_bucket_object_for_artifact(
+            rid, artifact="preview")
         s3_client, _, _ = s3.get_s3()
         try:
             s3_client.head_object(Bucket=bucket_name,

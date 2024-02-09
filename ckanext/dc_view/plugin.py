@@ -75,8 +75,9 @@ class DCViewPlugin(plugins.SingletonPlugin):
                                         "depends_on": copy.copy(depends_on)})
 
             # Upload the condensed dataset to S3
-            if s3.is_available():
-                jid_condensed_s3 = pkg_job_id + "previews3"
+            jid_condensed_s3 = pkg_job_id + "previews3"
+            if (s3.is_available() and not Job.exists(
+                    jid_condensed_s3, connection=ckan_redis_connect())):
                 toolkit.enqueue_job(
                     migrate_preview_to_s3_job,
                     [resource],
@@ -107,8 +108,9 @@ class DCViewPlugin(plugins.SingletonPlugin):
             return False
 
     def setup_template_variables(self, context, data_dict):
-        preview_url = '/dataset/{}/resource/{}/preview.jpg'.format(
-            data_dict['package']['id'], data_dict['resource']['id'])
+        ds_id = data_dict["package"]["id"]
+        rid = data_dict["resource"]["id"]
+        preview_url = f"/dataset/{ds_id}/resource/{rid}/preview.jpg"
         metadata_html = render_metadata_html(data_dict["resource"])
         return {
             'metadata_html': metadata_html,

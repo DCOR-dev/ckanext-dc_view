@@ -8,8 +8,7 @@ import ckan.plugins.toolkit as toolkit
 import dclab
 from dclab.rtdc_dataset import linker
 from dcor_shared import (
-    DC_MIME_TYPES, s3, sha256sum, get_ckan_config_option, get_resource_path,
-    wait_for_resource)
+    DC_MIME_TYPES, s3, s3cc, sha256sum, get_resource_path, wait_for_resource)
 import numpy as np
 
 # Create a temporary matplotlib config directory which is removed on exit
@@ -34,9 +33,9 @@ def create_preview_job(resource, override=False):
     mtype = resource.get('mimetype', '')
     if mtype in DC_MIME_TYPES:
         # only do this for rtdc data
-        jpgpath = path.with_name(path.name + "_preview.jpg")
-        if not jpgpath.exists() or override:
-            generate_preview(path, jpgpath)
+        jpg_path = path.with_name(path.name + "_preview.jpg")
+        if not jpg_path.exists() or override:
+            generate_preview(path, jpg_path)
             return True
     return False
 
@@ -49,14 +48,12 @@ def migrate_preview_to_s3_job(resource):
         admin_context(),
         {'id': resource["package_id"]})
     # Perform the upload
-    bucket_name = get_ckan_config_option(
-        "dcor_object_store.bucket_name").format(
-        organization_id=ds_dict["organization"]["id"])
-    rid = resource["id"]
+    bucket_name, object_name = s3cc.get_s3_bucket_object_for_artifact(
+        resource_id=resource["id"], artifact="preview")
     sha256 = sha256sum(path_prev)
     s3.upload_file(
         bucket_name=bucket_name,
-        object_name=f"preview/{rid[:3]}/{rid[3:6]}/{rid[6:]}",
+        object_name=object_name,
         path=path_prev,
         sha256=sha256,
         private=ds_dict["private"])

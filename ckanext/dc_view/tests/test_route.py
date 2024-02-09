@@ -1,15 +1,17 @@
+import pathlib
 from unittest import mock
 
 import ckan.common
 import ckan.model
 import ckan.tests.factories as factories
-import ckan.tests.helpers as helpers
 import ckanext.dcor_schemas.plugin
 import dcor_shared
+from dcor_shared.testing import make_dataset, synchronous_enqueue_job
 
 import pytest
 
-from .helper_methods import make_dataset, synchronous_enqueue_job
+
+data_path = pathlib.Path(__file__).parent / "data"
 
 
 @pytest.mark.ckan_config('ckan.plugins',
@@ -29,7 +31,7 @@ def test_route_redircet_preview_to_s3_private(
         'DISABLE_AFTER_DATASET_CREATE_FOR_CONCURRENT_JOB_TESTS',
         True)
 
-    user = factories.User()
+    user = factories.UserWithToken()
     user_obj = ckan.model.User.by_name(user["name"])
     monkeypatch.setattr(ckan.common,
                         'current_user',
@@ -43,11 +45,13 @@ def test_route_redircet_preview_to_s3_private(
                       'user': user['name'],
                       'api_version': 3}
     # create a dataset
-    ds_dict, res_dict = make_dataset(create_context, owner_org,
-                                     create_with_upload=create_with_upload,
-                                     activate=True,
-                                     private=True
-                                     )
+    ds_dict, res_dict = make_dataset(
+        create_context, owner_org,
+        create_with_upload=create_with_upload,
+        resource_path=data_path / "calibration_beads_47.rtdc",
+        activate=True,
+        private=True
+        )
     rid = res_dict["id"]
     assert "s3_available" in res_dict
     assert "s3_url" in res_dict
@@ -67,16 +71,9 @@ def test_route_redircet_preview_to_s3_private(
     assert len(resp0.history) == 0
 
     # Try again with token
-    data = helpers.call_action(
-        u"api_token_create",
-        context={u"model": ckan.model, u"user": user[u"name"]},
-        user=user[u"name"],
-        name=u"token-name",
-    )
-
     resp = app.get(
         f"/dataset/{did}/resource/{rid}/preview.jpg",
-        headers={u"authorization": data["token"]},
+        headers={u"authorization": user["token"]},
         )
 
     endpoint = dcor_shared.get_ckan_config_option(
@@ -124,9 +121,11 @@ def test_route_preview_to_s3_public(
                       'user': user['name'],
                       'api_version': 3}
     # create a dataset
-    ds_dict, res_dict = make_dataset(create_context, owner_org,
-                                     create_with_upload=create_with_upload,
-                                     activate=True)
+    ds_dict, res_dict = make_dataset(
+        create_context, owner_org,
+        create_with_upload=create_with_upload,
+        resource_path=data_path / "calibration_beads_47.rtdc",
+        activate=True)
     rid = res_dict["id"]
     assert "s3_available" in res_dict
     assert "s3_url" in res_dict

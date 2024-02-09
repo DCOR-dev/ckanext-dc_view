@@ -19,11 +19,10 @@ import ckan.tests.factories as factories
 
 import ckanext.dcor_schemas.plugin
 import dcor_shared
+from dcor_shared.testing import make_dataset
 
-from .helper_methods import make_dataset
 
-
-data_dir = pathlib.Path(__file__).parent / "data"
+data_path = pathlib.Path(__file__).parent / "data"
 
 
 def synchronous_enqueue_job(job_func, args=None, kwargs=None, title=None,
@@ -67,7 +66,7 @@ def test_create_preview_job(enqueue_job_mock, create_with_upload, monkeypatch,
     dataset = make_dataset(create_context,
                            owner_org,
                            activate=False)
-    path = data_dir / "calibration_beads_47.rtdc"
+    path = data_path / "calibration_beads_47.rtdc"
     content = path.read_bytes()
     result = create_with_upload(
         content, 'test.rtdc',
@@ -117,10 +116,12 @@ def test_upload_preview_dataset_to_s3_job(
     create_context = {'ignore_auth': False,
                       'user': user['name'],
                       'api_version': 3}
-    ds_dict, res_dict = make_dataset(create_context,
-                                     owner_org,
-                                     create_with_upload=create_with_upload,
-                                     activate=True)
+    ds_dict, res_dict = make_dataset(
+        create_context,
+        owner_org,
+        create_with_upload=create_with_upload,
+        resource_path=data_path / "calibration_beads_47.rtdc",
+        activate=True)
     bucket_name = dcor_shared.get_ckan_config_option(
         "dcor_object_store.bucket_name").format(
         organization_id=ds_dict["organization"]["id"])
