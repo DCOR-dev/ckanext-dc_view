@@ -56,7 +56,8 @@ def migrate_preview_to_s3_job(resource):
         object_name=object_name,
         path=path_prev,
         sha256=sha256,
-        private=ds_dict["private"])
+        private=ds_dict["private"],
+        override=False)
     # TODO: delete the local resource after successful upload?
 
 
