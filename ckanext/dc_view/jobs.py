@@ -1,14 +1,12 @@
 import atexit
 from collections import OrderedDict
 import os
+import pathlib
 import shutil
 import tempfile
 
-import ckan.plugins.toolkit as toolkit
 import dclab
-from dclab.rtdc_dataset import linker
-from dcor_shared import (
-    DC_MIME_TYPES, s3, s3cc, sha256sum, get_resource_path, wait_for_resource)
+from dcor_shared import DC_MIME_TYPES, s3cc, get_dc_instance, wait_for_resource
 import numpy as np
 
 # Create a temporary matplotlib config directory which is removed on exit
@@ -18,6 +16,7 @@ os.environ['MPLCONFIGDIR'] = mpldir
 
 from matplotlib.gridspec import GridSpec  # noqa: E402
 import matplotlib  # noqa: E402
+
 matplotlib.use('agg')
 import matplotlib.pylab as plt  # noqa: E402
 
@@ -28,55 +27,28 @@ def admin_context():
 
 def create_preview_job(resource, override=False):
     """Generate a *_preview.png file for a DC resource"""
-    path = get_resource_path(resource["id"])
-    wait_for_resource(resource["id"])
+    rid = resource["id"]
+    wait_for_resource(rid)
     mtype = resource.get('mimetype', '')
-    if mtype in DC_MIME_TYPES:
-        # only do this for rtdc data
-        jpg_path = path.with_name(path.name + "_preview.jpg")
-        if not jpg_path.exists() or override:
-            generate_preview(path, jpg_path)
-            return True
+    if (mtype in DC_MIME_TYPES
+        # Check whether the file already exists on S3
+        and (override
+             or not s3cc.artifact_exists(resource_id=rid,
+                                         artifact="preview"))):
+        # Create the preview in a temporary location
+        with tempfile.TemporaryDirectory() as ttd_name:
+            path_preview = pathlib.Path(ttd_name) / "preview.jpg"
+            with get_dc_instance(rid) as ds:
+                fig = overview_plot(rtdc_ds=ds)
+                fig.savefig(str(path_preview), dpi=80)
+                plt.close()
+            # Upload the preview to S3
+            s3cc.upload_artifact(resource_id=rid,
+                                 path_artifact=path_preview,
+                                 artifact="preview",
+                                 override=True)
+        return True
     return False
-
-
-def migrate_preview_to_s3_job(resource):
-    """Migrate a preview image to the S3 object store"""
-    path = get_resource_path(resource["id"])
-    path_prev = path.with_name(path.name + "_preview.jpg")
-    ds_dict = toolkit.get_action('package_show')(
-        admin_context(),
-        {'id': resource["package_id"]})
-    # Perform the upload
-    bucket_name, object_name = s3cc.get_s3_bucket_object_for_artifact(
-        resource_id=resource["id"], artifact="preview")
-    sha256 = sha256sum(path_prev)
-    s3.upload_file(
-        bucket_name=bucket_name,
-        object_name=object_name,
-        path=path_prev,
-        sha256=sha256,
-        private=ds_dict["private"],
-        override=False)
-    # TODO: delete the local resource after successful upload?
-
-
-def generate_preview(path_rtdc, path_jpg):
-    # Check whether we have a condensed version of the dataset.
-    # If so, include that in the overview plot.
-    paths = []
-    path_condensed = path_rtdc.with_name(path_rtdc.name + "_condensed.rtdc")
-    if path_condensed.exists():
-        paths.append(path_condensed)
-    paths.append(path_rtdc)
-    # We create a linked HDF5 file which includes all paths.
-    with linker.combine_h5files(paths, external="raise") as fd:
-        # We do not enable basins, because it is time-consuming.
-        ds = dclab.rtdc_dataset.fmt_hdf5.RTDC_HDF5(fd, enable_basins=False)
-        # This is the original dataset
-        fig = overview_plot(rtdc_ds=ds)
-        fig.savefig(str(path_jpg), dpi=80)
-        plt.close()
 
 
 def overview_plot(rtdc_ds):
@@ -108,7 +80,7 @@ def overview_plot(rtdc_ds):
     scatter_x = "area_um"
     scatter_y = "deform"
     # Event index to display
-    event_index = min(len(ds)-1, 47)
+    event_index = min(len(ds) - 1, 47)
 
     xlabel = dclab.dfn.get_feature_label(scatter_x, rtdc_ds=ds)
     ylabel = dclab.dfn.get_feature_label(scatter_y, rtdc_ds=ds)
@@ -135,7 +107,7 @@ def overview_plot(rtdc_ds):
             else:
                 height_ratios.append(2)
 
-    fig = plt.figure(figsize=(4, np.sum(height_ratios)*1.5))
+    fig = plt.figure(figsize=(4, np.sum(height_ratios) * 1.5))
 
     gs = GridSpec(numplots, 1, height_ratios=height_ratios)
     ii = 0

@@ -11,7 +11,7 @@ from dcor_shared import DC_MIME_TYPES, s3
 from rq.job import Job
 
 from .cli import get_commands
-from .jobs import create_preview_job, migrate_preview_to_s3_job
+from .jobs import create_preview_job
 from .meta import render_metadata_html
 from .route_funcs import dcpreview
 
@@ -52,8 +52,10 @@ class DCViewPlugin(plugins.SingletonPlugin):
 
     # IResourceController
     def after_resource_create(self, context, resource):
-        """Generate preview data"""
-        if resource.get('mimetype') in DC_MIME_TYPES:
+        """Generate preview image and upload to S3"""
+        # We only create the preview and upload it to S3 if the file is
+        # a DC file and if S3 is available.
+        if resource.get('mimetype') in DC_MIME_TYPES and s3.is_available():
             pkg_job_id = f"{resource['package_id']}_{resource['position']}_"
             depends_on = []
             extensions = [config.get("ckan.plugins")]
@@ -63,7 +65,7 @@ class DCViewPlugin(plugins.SingletonPlugin):
                 # Wait for the resource to be moved to the depot.
                 jid_sl = pkg_job_id + "symlink"
                 depends_on.append(jid_sl)
-            jid_preview = pkg_job_id + "preview"
+            jid_preview = pkg_job_id + "previews3"
             if not Job.exists(jid_preview, connection=ckan_redis_connect()):
                 toolkit.enqueue_job(create_preview_job,
                                     [resource],
@@ -73,20 +75,6 @@ class DCViewPlugin(plugins.SingletonPlugin):
                                         "timeout": 3600,
                                         "job_id": jid_preview,
                                         "depends_on": copy.copy(depends_on)})
-
-            # Upload the condensed dataset to S3
-            jid_condensed_s3 = pkg_job_id + "previews3"
-            if (s3.is_available() and not Job.exists(
-                    jid_condensed_s3, connection=ckan_redis_connect())):
-                toolkit.enqueue_job(
-                    migrate_preview_to_s3_job,
-                    [resource],
-                    title="Migrate preview image to S3 object store",
-                    queue="dcor-normal",
-                    rq_kwargs={"timeout": 1000,
-                               "job_id": jid_condensed_s3,
-                               "depends_on": [jid_preview]}
-                    )
 
     # IResourceView
     def info(self):

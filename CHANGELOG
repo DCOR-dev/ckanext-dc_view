@@ -1,5 +1,6 @@
 0.9.0
- - ref: migrate to dcor_shared 0.7.2
+ - ref: don't create any preview files locally, upload directly to S3
+ - ref: migrate to dcor_shared 0.7.4
 0.8.2
  - maintenance release
 0.8.1
