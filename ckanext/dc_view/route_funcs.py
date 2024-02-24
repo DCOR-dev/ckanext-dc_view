@@ -1,18 +1,13 @@
-import pathlib
-
-import flask
 from ckan.common import c
-import ckan.lib.uploader as uploader
 from ckan import logic
 import ckan.model as model
 import ckan.plugins.toolkit as toolkit
 
-import botocore.exceptions
 from dcor_shared import s3, s3cc
 
 
 def dcpreview(ds_id, res_id):
-    """Serve a preview image on disk
+    """Redirect to a preview image on S3 for a DC resource
 
     Parameters
     ----------
@@ -37,17 +32,9 @@ def dcpreview(ds_id, res_id):
     res_stem, _ = res_dict["name"].rsplit(".", 1)
     prev_name = f"{res_stem}_preview.jpg"
 
-    if s3 is not None and res_dict.get('s3_available'):
-        # check if the corresponding S3 object
-        bucket_name, object_name = s3cc.get_s3_bucket_object_for_artifact(
-            rid, artifact="preview")
-        s3_client, _, _ = s3.get_s3()
-        try:
-            s3_client.head_object(Bucket=bucket_name,
-                                  Key=object_name)
-        except botocore.exceptions.ClientError:
-            pass
-        else:
+    if s3.is_available() and res_dict.get('s3_available'):
+        # check if the corresponding S3 object exists
+        if s3cc.artifact_exists(resource_id=rid, artifact="preview"):
             # We have an S3 object that we can redirect to. We are making use
             # of presigned URLs to be able to specify a filename for download
             # (otherwise, users that download via the web interface will
@@ -57,6 +44,8 @@ def dcpreview(ds_id, res_id):
                 expiration = 3600
             else:
                 expiration = 86400
+            bucket_name, object_name = s3cc.get_s3_bucket_object_for_artifact(
+                resource_id=rid, artifact="preview")
             ps_url = s3.create_presigned_url(
                 bucket_name=bucket_name,
                 object_name=object_name,
@@ -64,12 +53,4 @@ def dcpreview(ds_id, res_id):
                 expiration=expiration)
             return toolkit.redirect_to(ps_url)
 
-    if res_dict.get('url_type') == 'upload':
-        upload = uploader.get_resource_uploader(res_dict)
-        filepath = pathlib.Path(upload.get_path(res_dict['id']))
-        jpg_file = filepath.with_name(filepath.name + "_preview.jpg")
-        if not jpg_file.exists():
-            return toolkit.abort(404, toolkit._('Preview not found'))
-        return flask.send_from_directory(jpg_file.parent, jpg_file.name,
-                                         attachment_filename=prev_name)
     return toolkit.abort(404, toolkit._('No preview available'))
