@@ -29,7 +29,7 @@ def dcpreview(ds_id, res_id):
         # to unprivileged users.
         return toolkit.abort(404, toolkit._('Resource not found'))
 
-    res_stem, _ = res_dict["name"].rsplit(".", 1)
+    res_stem = res_dict["name"].rsplit(".", 1)[0]
     prev_name = f"{res_stem}_preview.jpg"
 
     if s3.is_available() and res_dict.get('s3_available'):
