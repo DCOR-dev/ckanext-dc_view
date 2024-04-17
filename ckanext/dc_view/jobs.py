@@ -9,9 +9,9 @@ import dclab
 from dcor_shared import DC_MIME_TYPES, s3cc, get_dc_instance, wait_for_resource
 import numpy as np
 
-# Create a temporary matplotlib config directory which is removed on exit
-mpldir = tempfile.mkdtemp(prefix="ckan_dcor_dc_view_")
-atexit.register(shutil.rmtree, mpldir)
+# Create a matplotlib config directory, so we can import and use matplotlib
+mpldir = "/tmp/matplotlib"
+pathlib.Path(mpldir).mkdir(exist_ok=True)
 os.environ['MPLCONFIGDIR'] = mpldir
 
 from matplotlib.gridspec import GridSpec  # noqa: E402
@@ -36,7 +36,8 @@ def create_preview_job(resource, override=False):
              or not s3cc.artifact_exists(resource_id=rid,
                                          artifact="preview"))):
         # Create the preview in a temporary location
-        with tempfile.TemporaryDirectory() as ttd_name:
+        ttd_name = tempfile.mkdtemp(prefix="ckanext-dc_view_")
+        try:
             path_preview = pathlib.Path(ttd_name) / "preview.jpg"
             with get_dc_instance(rid) as ds:
                 fig = overview_plot(rtdc_ds=ds)
@@ -47,7 +48,12 @@ def create_preview_job(resource, override=False):
                                  path_artifact=path_preview,
                                  artifact="preview",
                                  override=True)
-        return True
+        except BaseException:
+            pass
+        else:
+            return True
+        finally:
+            shutil.rmtree(ttd_name, ignore_errors=True)
     return False
 
 

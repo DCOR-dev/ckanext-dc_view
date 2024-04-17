@@ -1,3 +1,6 @@
+0.9.1
+ - ref: do not use tempfile.TemporaryDirectory
+ - ref: create /tmp/matplotlib before importing matplotlib
 0.9.0
  - ref: don't create any preview files locally, upload directly to S3
  - ref: only serve preview images from S3
