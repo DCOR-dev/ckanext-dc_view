@@ -1,6 +1,8 @@
+import html
 import numbers
 
 import dclab
+from dclab.features.emodulus.viscosity import ALIAS_MEDIA
 
 
 def render_metadata_html(res_dict):
@@ -13,18 +15,19 @@ def render_metadata_html(res_dict):
                 meta[sec] = {}
             meta[sec][key] = res_dict[dckey]
 
-    html = []
+    html_code = []
     for sec in ["experiment", "pipeline", "setup", "imaging", "fluorescence"]:
         if sec in meta:
-            html += meta_html_table(meta, sec)
-            html.append("<br>")
+            html_code += meta_html_table(meta, sec)
+            html_code.append("<br>")
 
-    return "\n".join(html)
+    return "\n".join(html_code)
 
 
 def meta_html_table(meta, sec):
-    html = [
-        '<table class="table table-striped table-bordered table-condensed dc_view">',
+    html_code = [
+        '<table class="table table-striped '
+        + 'table-bordered table-condensed dc_view">',
         f'<caption class="dc_view">{sec.capitalize()}</caption>',
     ]
 
@@ -32,7 +35,7 @@ def meta_html_table(meta, sec):
     for name, key in sorted(kn):
         value = meta[sec][key]
         if isinstance(value, numbers.Number):
-            value = "{:.4g}".format(value)
+            value = f"{value:.4g}"
 
         # Special cases
         if sec == "experiment":
@@ -43,8 +46,9 @@ def meta_html_table(meta, sec):
         elif sec == "setup":
             if key == "chip region":
                 name = name.split(" (")[0]
-            elif key == "medium" and value == "CellCarrierB":
-                value = "CellCarrier B"
+            elif key == "medium" and value in ALIAS_MEDIA:
+                # Convert names to common names
+                value = ALIAS_MEDIA[value]
             elif key == "module composition":
                 name = "Modules used"
                 value = ", ".join(value.split(","))
@@ -57,11 +61,11 @@ def meta_html_table(meta, sec):
             units = units.strip("] ")
             value += " " + units
 
-        html += [
-            '<tr>',
-            u'<th class="dataset-labels">{}</th>'.format(name),
-            u'<td class="dataset-details">{}</td>'.format(value),
-            '</tr>',
+        html_code += [
+            f'<tr>',
+            f'<th class="dataset-labels">{html.escape(name)}</th>',
+            f'<td class="dataset-details">{html.escape(value)}</td>',
+            f'</tr>',
         ]
-    html.append("</table>")
-    return html
+    html_code.append("</table>")
+    return html_code
