@@ -14,7 +14,7 @@ def render_metadata_html(res_dict):
             meta[sec][key] = res_dict[dckey]
 
     html = []
-    for sec in ["experiment", "setup", "imaging", "fluorescence"]:
+    for sec in ["experiment", "pipeline", "setup", "imaging", "fluorescence"]:
         if sec in meta:
             html += meta_html_table(meta, sec)
             html.append("<br>")
@@ -24,8 +24,8 @@ def render_metadata_html(res_dict):
 
 def meta_html_table(meta, sec):
     html = [
-        '<table class="table table-striped table-bordered table-condensed">',
-        "<caption>{}</caption>".format(sec.capitalize()),
+        '<table class="table table-striped table-bordered table-condensed dc_view">',
+        f'<caption class="dc_view">{sec.capitalize()}</caption>',
     ]
 
     kn = [(dclab.dfn.config_descr[sec][key], key) for key in meta[sec].keys()]

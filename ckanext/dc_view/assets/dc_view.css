@@ -8,10 +8,16 @@
 }
 
 
-caption { 
+caption.dc_view {
+  caption-side: top;
+  padding-bottom: 0;
   display: table-caption;
   text-align: left;
   font-weight: bold;
   color: black;
   padding-left: 2px;
+}
+
+table.dc_view {
+  border-top: 2px solid #5D7597;
 }

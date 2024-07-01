@@ -1,3 +1,6 @@
+0.9.2
+ - enh: show metadata table caption at top
+ - enh: show "pipeline" metadata
 0.9.1
  - ref: do not use tempfile.TemporaryDirectory
  - ref: create /tmp/matplotlib before importing matplotlib
