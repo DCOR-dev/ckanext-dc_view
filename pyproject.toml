@@ -1,0 +1,52 @@
+[build-system]
+# Defined by PEP 518:
+requires = [
+    # for version management
+    "setuptools>=46", "setuptools_scm[toml]>=6.2"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ckanext-dc_view"
+authors = [
+    # In alphabetical order.
+    {name = "Paul Müller"},
+]
+maintainers = [
+    {name = "Paul Müller", email="dev@craban.de"},
+]
+description = "Preview DC data on DCOR"
+readme = "README.rst"
+requires-python = ">=3.8, <4"
+keywords = ["DC", "DCOR", "deformability", "cytometry"]
+classifiers = [
+    'Operating System :: OS Independent',
+    'Programming Language :: Python :: 3',
+    'Topic :: Scientific/Engineering :: Visualization',
+    'Intended Audience :: Science/Research',
+]
+license = {text = "GNU Affero General Public License v3 or later (AGPLv3+)"}
+dependencies = [
+    "ckan>=2.10.4, <3",
+    "dclab>=0.60.9",
+    "matplotlib",
+    "numpy>=1.19",
+    "pillow",
+]
+dynamic = ["version"]
+
+[project.urls]
+source = "https://github.com/DCOR-dev/ckanext-dc_view"
+tracker = "https://github.com/DCOR-dev/ckanext-dc_view/issues"
+changelog = "https://github.com/DCOR-dev/ckanext-dc_view/blob/main/CHANGELOG"
+
+[project.entry-points."ckan.plugins"]
+dc_view = "ckanext.dc_view.plugin:DCViewPlugin"
+
+[tool.setuptools_scm]
+write_to = "ckanext/dc_view/_version.py"
+version_scheme = "post-release"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ckanext.dc_view"]
