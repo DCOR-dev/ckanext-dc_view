@@ -1,7 +1,7 @@
 import copy
 
 from flask import Blueprint
-from ckan.common import config
+from ckan import common
 import ckan.lib.datapreview as datapreview
 from ckan.lib.jobs import _connect as ckan_redis_connect
 import ckan.plugins.toolkit as toolkit
@@ -18,8 +18,8 @@ from .route_funcs import dcpreview
 
 class DCViewPlugin(plugins.SingletonPlugin):
     """DC data view and route for *_preview.png"""
-    plugins.implements(plugins.IBlueprint)
-    plugins.implements(plugins.IClick)
+    plugins.implements(plugins.IBlueprint, inherit=True)
+    plugins.implements(plugins.IClick, inherit=True)
     plugins.implements(plugins.IConfigurer, inherit=True)
     plugins.implements(plugins.IResourceController, inherit=True)
     plugins.implements(plugins.IResourceView, inherit=True)
@@ -58,7 +58,7 @@ class DCViewPlugin(plugins.SingletonPlugin):
         if resource.get('mimetype') in DC_MIME_TYPES and s3.is_available():
             pkg_job_id = f"{resource['package_id']}_{resource['position']}_"
             depends_on = []
-            extensions = [config.get("ckan.plugins")]
+            extensions = [common.config.get("ckan.plugins")]
             # Are we waiting for symlinking (ckanext-dcor_depot)?
             # (This makes wait_for_resource really fast ;)
             if "dcor_depot" in extensions:
