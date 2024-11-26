@@ -1,17 +1,11 @@
-import copy
-
 from flask import Blueprint
-from ckan import common
 import ckan.lib.datapreview as datapreview
-from ckan.lib.jobs import _connect as ckan_redis_connect
-import ckan.plugins.toolkit as toolkit
 import ckan.plugins as plugins
 
 from dcor_shared import DC_MIME_TYPES, s3
-from rq.job import Job
 
 from .cli import get_commands
-from .jobs import create_preview_job
+from . import jobs
 from .meta import render_metadata_html
 from .route_funcs import dcpreview
 
@@ -55,26 +49,9 @@ class DCViewPlugin(plugins.SingletonPlugin):
         """Generate preview image and upload to S3"""
         # We only create the preview and upload it to S3 if the file is
         # a DC file and if S3 is available.
-        if resource.get('mimetype') in DC_MIME_TYPES and s3.is_available():
-            pkg_job_id = f"{resource['package_id']}_{resource['position']}_"
-            depends_on = []
-            extensions = [common.config.get("ckan.plugins")]
-            # Are we waiting for symlinking (ckanext-dcor_depot)?
-            # (This makes wait_for_resource really fast ;)
-            if "dcor_depot" in extensions:
-                # Wait for the resource to be moved to the depot.
-                jid_sl = pkg_job_id + "symlink"
-                depends_on.append(jid_sl)
-            jid_preview = pkg_job_id + "previews3"
-            if not Job.exists(jid_preview, connection=ckan_redis_connect()):
-                toolkit.enqueue_job(create_preview_job,
-                                    [resource],
-                                    title="Create resource preview image",
-                                    queue="dcor-normal",
-                                    rq_kwargs={
-                                        "timeout": 3600,
-                                        "job_id": jid_preview,
-                                        "depends_on": copy.copy(depends_on)})
+        if not context.get("is_background_job") and s3.is_available():
+            # All jobs are defined via decorators in jobs.py
+            jobs.RQJob.enqueue_all_jobs(resource, ckanext="dc_view")
 
     # IResourceView
     def info(self):

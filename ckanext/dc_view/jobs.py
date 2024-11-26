@@ -1,13 +1,20 @@
-import atexit
 from collections import OrderedDict
+import logging
 import os
 import pathlib
 import shutil
 import tempfile
 
 import dclab
-from dcor_shared import DC_MIME_TYPES, s3cc, get_dc_instance, wait_for_resource
+from dcor_shared import (
+    DC_MIME_TYPES, get_dc_instance, rqjob_register, s3, s3cc, wait_for_resource
+)
+from dcor_shared import RQJob  # noqa: F401
+
 import numpy as np
+
+
+log = logging.getLogger(__name__)
 
 # Create a matplotlib config directory, so we can import and use matplotlib
 mpldir = "/tmp/matplotlib"
@@ -25,12 +32,27 @@ def admin_context():
     return {'ignore_auth': True, 'user': 'default'}
 
 
-def create_preview_job(resource, override=False):
+@rqjob_register(ckanext="dc_view",
+                queue="dcor-normal",
+                timeout=3600,
+                )
+def job_create_preview(resource, override=False):
     """Generate a *_preview.png file for a DC resource"""
+    if not s3.is_available():
+        log.info("S3 not available, not computing condensed resource")
+        return False
+
+    # make sure mimetype is defined
+    if "mimetype" not in resource:
+        suffix = "." + resource["name"].rsplit(".", 1)[-1]
+        for mt in DC_MIME_TYPES:
+            if suffix in DC_MIME_TYPES[mt]:
+                resource["mimetype"] = mt
+                break
+
     rid = resource["id"]
     wait_for_resource(rid)
-    mtype = resource.get('mimetype', '')
-    if (mtype in DC_MIME_TYPES
+    if (resource.get('mimetype', '') in DC_MIME_TYPES
         # Check whether the file already exists on S3
         and (override
              or not s3cc.artifact_exists(resource_id=rid,

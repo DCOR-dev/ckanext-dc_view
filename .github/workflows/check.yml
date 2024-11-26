@@ -11,9 +11,9 @@ jobs:
   checks:
     runs-on: macos-12
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@main
     - name: Set up Python 3.8
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@main
       with:
         python-version: "3.8"
     - name: Install flake8 dependencies

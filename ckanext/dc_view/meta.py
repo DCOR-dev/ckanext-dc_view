@@ -62,10 +62,10 @@ def meta_html_table(meta, sec):
             value += " " + units
 
         html_code += [
-            f'<tr>',
+            '<tr>',
             f'<th class="dataset-labels">{html.escape(name)}</th>',
             f'<td class="dataset-details">{html.escape(value)}</td>',
-            f'</tr>',
+            '</tr>',
         ]
     html_code.append("</table>")
     return html_code
