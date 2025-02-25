@@ -30,6 +30,9 @@ jobs:
     - name: Wait for CKAN to be healthy
       run: docker-compose -f docker-compose.ci.yml exec dcor-test bash -c "while ! wget -qO- http://localhost:5000; do sleep 5; done"
 
+    - name: List running services (for debugging)
+      run: docker-compose ps
+
     - name: Run Tests
       run: bash ./docker-run-tests.sh
 
