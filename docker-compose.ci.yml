@@ -1,0 +1,101 @@
+volumes:
+  ckan_storage:
+  pg_data:
+  solr_data:
+  pip_cache:
+  site_packages:
+  vscode_server:
+  minio_data:
+
+services:
+  dcor-test:
+    # Use image from Raghava's dockerHub
+    image: raghavaalajangi95/dcor-ckan-docker-ckan:latest
+    env_file:
+      docker-ci.env
+    links:
+      - db
+      - solr
+      - redis
+      - minio
+    # hostname is defined as a docker resource in `dcor_control`
+    hostname: dcor-dev-docker
+    ports:
+      - "0.0.0.0:${CKAN_PORT_HOST}:5000"
+    user: root # This will avoid permission errors
+    volumes:
+      - ckan_storage:/var/lib/ckan
+      # Map current GitHub runner working dir as src_extensions dir within 
+      # the container (this will allow us to access the ckanext-dcor_theme 
+      # directly inside src_extensions)
+      - ./:/srv/app/src_extensions
+      - pip_cache:/root/.cache/pip
+      - site_packages:/usr/lib/python3.10/site-packages
+      - vscode_server:/root/.vscode-server
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:5000"]
+
+  datapusher:
+    image: ckan/ckan-base-datapusher:${DATAPUSHER_VERSION}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8800"]
+
+  db:
+    # Use image from Raghava's dockerHub
+    image: raghavaalajangi95/dcor-ckan-docker-postgresql:latest
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - CKAN_DB_USER
+      - CKAN_DB_PASSWORD
+      - CKAN_DB
+      - DATASTORE_READONLY_USER
+      - DATASTORE_READONLY_PASSWORD
+      - DATASTORE_DB
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+     
+  solr:
+    image: ckan/ckan-solr:${SOLR_IMAGE_VERSION}
+    volumes:
+      - solr_data:/var/solr
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8983/solr/"]
+
+  redis:
+    image: redis:${REDIS_VERSION}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-e", "QUIT"]
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    environment:
+      - MINIO_ROOT_USER
+      - MINIO_ROOT_PASSWORD
+    command: minio server --console-address ":9001" /data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  mc:
+    image: minio/mc:RELEASE.2020-08-08T02-33-58Z
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host rm local;
+      /usr/bin/mc config host add --api s3v4 local http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb local/ckan/;
+      /usr/bin/mc policy set download local/ckan/storage;
+      "
