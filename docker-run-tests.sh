@@ -3,7 +3,7 @@
 # Fail immediately if any command fails
 set -e
 
-EXTENSION_NAME="ckanext-dcor_view"  # Change this to your extension's name
+EXTENSION_NAME="ckanext-dc_view"  # Change this to your extension's name
 CKAN_CONTAINER="${EXTENSION_NAME}-dcor-test-1" # CKAN container name
 EXTENSION_PATH="/srv/app/src_extensions/"
 
