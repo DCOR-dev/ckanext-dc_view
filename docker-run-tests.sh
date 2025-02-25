@@ -21,7 +21,7 @@ docker exec -u root ${CKAN_CONTAINER} bash -c "
 
   # Install ckanext-dcor_theme and its test requirements
   pip install .;
-  pip install -r ./ckanext/dcor_view/tests/requirements.txt;
+  pip install -r ./ckanext/dc_view/tests/requirements.txt;
 
   # Change ownership so that 'ckan' user can use the virtual environment
   chown -R ckan:ckan-sys ${EXTENSION_PATH}/venv
@@ -34,7 +34,7 @@ docker exec ${CKAN_CONTAINER} bash -c "
   source venv/bin/activate;
 
   # Run coverage
-  coverage run --source=ckanext.dcor_view --omit=*tests* -m pytest -p no:warnings ckanext;
+  coverage run --source=ckanext.dc_view --omit=*tests* -m pytest -p no:warnings ckanext;
   
   # Generate the XML report
   coverage xml
