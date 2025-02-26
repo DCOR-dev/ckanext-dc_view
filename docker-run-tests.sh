@@ -19,7 +19,7 @@ docker exec -u root ${CKAN_CONTAINER} bash -c "
   # Update dcor libraries
   dcor update --yes;
 
-  # Install ckanext-dcor_theme and its test requirements
+  # Install ckanext-dc_view and its test requirements
   pip install .;
   pip install -r ./ckanext/dc_view/tests/requirements.txt;
 
@@ -29,21 +29,27 @@ docker exec -u root ${CKAN_CONTAINER} bash -c "
 
 # Run tests on GitHub runner where container gets permissions from.
 echo "Running tests in the virtual environment..."
+
+# Capture the exit code of pytest/coverage directly
+PYTEST_EXIT_CODE=$(docker exec ${CKAN_CONTAINER} bash -c "
+  cd ${EXTENSION_PATH};
+  source venv/bin/activate;
+  # Run coverage
+  coverage run --source=ckanext.dc_view --omit=*tests* -m pytest -p no:warnings ckanext;
+  echo \$? # Echo pytest's exit code
+")
+
+# Generate the XML report
 docker exec ${CKAN_CONTAINER} bash -c "
   cd ${EXTENSION_PATH};
   source venv/bin/activate;
-
-  # Run coverage
-  coverage run --source=ckanext.dc_view --omit=*tests* -m pytest -p no:warnings ckanext;
-  
-  # Generate the XML report
-  coverage xml
+  coverage xml;
 "
 
-# Check the exit code of the pytest command
-if [ $? -ne 0 ]; then
-  echo "Tests failed inside the container."
-  exit 1  # Exit with a non-zero code to indicate failure
+# Check the exit code of pytest
+if [ $PYTEST_EXIT_CODE -ne 0 ]; then
+  echo "Tests failed inside the container. Pytest exit code: $PYTEST_EXIT_CODE"
+  exit 1
 fi
 
 echo "Tests passed inside the container."
