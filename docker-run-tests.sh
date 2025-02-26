@@ -40,4 +40,10 @@ docker exec ${CKAN_CONTAINER} bash -c "
   coverage xml
 "
 
-echo "Tests completed!"
+# Check the exit code of the pytest command
+if [ $? -ne 0 ]; then
+  echo "Tests failed inside the container."
+  exit 1  # Exit with a non-zero code to indicate failure
+fi
+
+echo "Tests passed inside the container."
