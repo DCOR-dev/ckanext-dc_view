@@ -3,8 +3,7 @@
 # Fail immediately if any command fails
 set -e
 
-EXTENSION_NAME="ckanext-dc_view"  # Change this to your extension's name
-CKAN_CONTAINER="${EXTENSION_NAME}-dcor-test-1" # CKAN container name
+CKAN_CONTAINER="dcor_ckan" # CKAN container name
 EXTENSION_PATH="/srv/app/src_extensions/"
 
 # Create venv and install dependencies as a root user inside the container
