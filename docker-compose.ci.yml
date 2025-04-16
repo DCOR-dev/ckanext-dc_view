@@ -8,9 +8,10 @@ volumes:
   minio_data:
 
 services:
-  dcor-test:
+  ckan:
     # Use image from Raghava's dockerHub
-    image: raghavaalajangi95/dcor-ckan-docker-ckan:latest
+    image: raghavaalajangi95/dcor-ckan:latest
+    container_name: dcor_ckan
     env_file:
       docker-ci.env
     links:
@@ -38,23 +39,17 @@ services:
 
   datapusher:
     image: ckan/ckan-base-datapusher:${DATAPUSHER_VERSION}
+    container_name: datapusher
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8800"]
 
   db:
     # Use image from Raghava's dockerHub
-    image: raghavaalajangi95/dcor-ckan-docker-postgresql:latest
-    environment:
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-      - POSTGRES_DB
-      - CKAN_DB_USER
-      - CKAN_DB_PASSWORD
-      - CKAN_DB
-      - DATASTORE_READONLY_USER
-      - DATASTORE_READONLY_PASSWORD
-      - DATASTORE_DB
+    image: raghavaalajangi95/dcor-postgresql:latest
+    container_name: postgres
+    env_file:
+      - docker-ci.env
     volumes:
       - pg_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -63,6 +58,7 @@ services:
      
   solr:
     image: ckan/ckan-solr:${SOLR_IMAGE_VERSION}
+    container_name: solr
     volumes:
       - solr_data:/var/solr
     restart: unless-stopped
@@ -71,31 +67,25 @@ services:
 
   redis:
     image: redis:${REDIS_VERSION}
+    container_name: redis
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "-e", "QUIT"]
 
   minio:
-    image: minio/minio:latest
+    # Use image from Raghava's dockerHub
+    image: raghavaalajangi95/dcor-minio:latest
+    container_name: minio
     restart: unless-stopped
-    environment:
-      - MINIO_ROOT_USER
-      - MINIO_ROOT_PASSWORD
-    command: minio server --console-address ":9001" /data
+    env_file:
+      - docker-ci.env
     ports:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - minio_data:/data
-
-  mc:
-    image: minio/mc:RELEASE.2020-08-08T02-33-58Z
-    depends_on:
-      - minio
-    entrypoint: >
-      /bin/sh -c "
-      /usr/bin/mc config host rm local;
-      /usr/bin/mc config host add --api s3v4 local http://minio:9000 minioadmin minioadmin;
-      /usr/bin/mc mb local/ckan/;
-      /usr/bin/mc policy set download local/ckan/storage;
-      "
+      - minio_data:/data-minio
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
