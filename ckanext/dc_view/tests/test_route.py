@@ -71,7 +71,7 @@ def test_route_redirect_preview_to_s3_private(
     # Try again with token
     resp = app.get(
         f"/dataset/{did}/resource/{rid}/preview.jpg",
-        headers={u"authorization": user["token"]},
+        headers={"Authorization": user["token"]},
         follow_redirects=False,
         )
 
@@ -189,7 +189,7 @@ def test_route_s3_redirect_preview_to_s3_private(
     # Try again with token
     resp = app.get(
         f"/dataset/{did}/resource/{rid}/preview.jpg",
-        headers={u"authorization": user["token"]},
+        headers={"Authorization": user["token"]},
         follow_redirects=False,
         )
 
