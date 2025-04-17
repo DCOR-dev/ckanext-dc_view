@@ -16,6 +16,9 @@ docker exec -u root ${CKAN_CONTAINER} bash -c "
   # Install ckanext-dc_view and its test requirements
   pip install .;
   pip install -r ./ckanext/dc_view/tests/requirements.txt;
+
+  # Make sure everything is in order
+  dcor inspect --assume-yes;
 "
 
 # Run tests on GitHub runner where container gets permissions from.
