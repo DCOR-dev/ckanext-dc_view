@@ -64,7 +64,7 @@ def test_route_redirect_preview_to_s3_private(
     resp0 = app.get(
         f"/dataset/{did}/resource/{rid}/preview.jpg",
         status=404,
-        follow_redirects=True,
+        follow_redirects=False,
         )
     assert len(resp0.history) == 0
 
@@ -72,7 +72,7 @@ def test_route_redirect_preview_to_s3_private(
     resp = app.get(
         f"/dataset/{did}/resource/{rid}/preview.jpg",
         headers={u"authorization": user["token"]},
-        follow_redirects = True,
+        follow_redirects=False,
         )
 
     endpoint = dcor_shared.get_ckan_config_option(
