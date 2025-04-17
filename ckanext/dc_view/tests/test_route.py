@@ -80,7 +80,7 @@ def test_route_redirect_preview_to_s3_private(
     bucket_name = dcor_shared.get_ckan_config_option(
         "dcor_object_store.bucket_name").format(
         organization_id=ds_dict["organization"]["id"])
-    redirect = resp.history[0]
+    redirect = resp
     assert redirect.status_code == 302
     redirect_stem = (f"{endpoint}/{bucket_name}/preview/"
                      f"{rid[:3]}/{rid[3:6]}/{rid[6:]}")
@@ -123,7 +123,7 @@ def test_route_preview_to_s3_public(
     did = ds_dict["id"]
     resp = app.get(
         f"/dataset/{did}/resource/{rid}/preview.jpg",
-        follow_redirects=True,
+        follow_redirects=False,
         )
 
     endpoint = dcor_shared.get_ckan_config_option(
@@ -131,7 +131,7 @@ def test_route_preview_to_s3_public(
     bucket_name = dcor_shared.get_ckan_config_option(
         "dcor_object_store.bucket_name").format(
         organization_id=ds_dict["organization"]["id"])
-    redirect = resp.history[0]
+    redirect = resp
     assert redirect.status_code == 302
     assert redirect.location.startswith(f"{endpoint}/{bucket_name}/preview/"
                                         f"{rid[:3]}/{rid[3:6]}/{rid[6:]}")
@@ -182,7 +182,7 @@ def test_route_s3_redirect_preview_to_s3_private(
     resp0 = app.get(
         f"/dataset/{did}/resource/{rid}/preview.jpg",
         status=404,
-        follow_redirects=True,
+        follow_redirects=False,
         )
     assert len(resp0.history) == 0
 
@@ -190,7 +190,7 @@ def test_route_s3_redirect_preview_to_s3_private(
     resp = app.get(
         f"/dataset/{did}/resource/{rid}/preview.jpg",
         headers={u"authorization": user["token"]},
-        follow_redirects=True,
+        follow_redirects=False,
         )
 
     endpoint = dcor_shared.get_ckan_config_option(
@@ -198,7 +198,7 @@ def test_route_s3_redirect_preview_to_s3_private(
     bucket_name = dcor_shared.get_ckan_config_option(
         "dcor_object_store.bucket_name").format(
         organization_id=ds_dict["organization"]["id"])
-    redirect = resp.history[0]
+    redirect = resp
     assert redirect.status_code == 302
     redirect_stem = (f"{endpoint}/{bucket_name}/preview/"
                      f"{rid[:3]}/{rid[3:6]}/{rid[6:]}")
@@ -237,7 +237,7 @@ def test_route_s3_preview_to_s3_public(
     did = ds_dict["id"]
     resp = app.get(
         f"/dataset/{did}/resource/{rid}/preview.jpg",
-        follow_redirects=True,
+        follow_redirects=False,
         )
 
     endpoint = dcor_shared.get_ckan_config_option(
@@ -245,7 +245,7 @@ def test_route_s3_preview_to_s3_public(
     bucket_name = dcor_shared.get_ckan_config_option(
         "dcor_object_store.bucket_name").format(
         organization_id=ds_dict["organization"]["id"])
-    redirect = resp.history[0]
+    redirect = resp
     assert redirect.status_code == 302
     assert redirect.location.startswith(f"{endpoint}/{bucket_name}/preview/"
                                         f"{rid[:3]}/{rid[3:6]}/{rid[6:]}")
