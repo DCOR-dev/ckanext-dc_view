@@ -6,8 +6,9 @@ import ckan.model
 import ckan.tests.factories as factories
 import ckanext.dcor_schemas.plugin
 import dcor_shared
-from dcor_shared.testing import (
-    make_dataset, make_dataset_via_s3, synchronous_enqueue_job
+from dcor_shared.testing import (  # noqa: F401
+    make_dataset, make_dataset_via_s3, synchronous_enqueue_job,
+    create_with_upload_no_temp
 )
 
 import pytest
@@ -22,8 +23,8 @@ data_path = pathlib.Path(__file__).parent / "data"
 @mock.patch('ckan.plugins.toolkit.enqueue_job',
             side_effect=synchronous_enqueue_job)
 def test_route_redirect_preview_to_s3_private(
-        enqueue_job_mock, app, tmpdir, create_with_upload_no_temp,
-        monkeypatch):
+        enqueue_job_mock, app, tmpdir, monkeypatch,
+        create_with_upload_no_temp):  # noqa: F811
     monkeypatch.setattr(
         ckanext.dcor_schemas.plugin,
         'DISABLE_AFTER_DATASET_CREATE_FOR_CONCURRENT_JOB_TESTS',
@@ -91,8 +92,8 @@ def test_route_redirect_preview_to_s3_private(
 @mock.patch('ckan.plugins.toolkit.enqueue_job',
             side_effect=synchronous_enqueue_job)
 def test_route_redirect_preview_to_s3_public(
-        enqueue_job_mock, app, tmpdir, create_with_upload_no_temp,
-        monkeypatch):
+        enqueue_job_mock, app, tmpdir, monkeypatch,
+        create_with_upload_no_temp):  # noqa: F811
     monkeypatch.setattr(
         ckanext.dcor_schemas.plugin,
         'DISABLE_AFTER_DATASET_CREATE_FOR_CONCURRENT_JOB_TESTS',
