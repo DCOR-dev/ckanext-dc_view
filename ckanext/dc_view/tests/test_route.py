@@ -63,7 +63,8 @@ def test_route_redirect_preview_to_s3_private(
     # We should not be authorized to access the resource without API token
     resp0 = app.get(
         f"/dataset/{did}/resource/{rid}/preview.jpg",
-        status=404
+        status=404,
+        follow_redirects=True,
         )
     assert len(resp0.history) == 0
 
@@ -71,6 +72,7 @@ def test_route_redirect_preview_to_s3_private(
     resp = app.get(
         f"/dataset/{did}/resource/{rid}/preview.jpg",
         headers={u"authorization": user["token"]},
+        follow_redirects = True,
         )
 
     endpoint = dcor_shared.get_ckan_config_option(
@@ -121,6 +123,7 @@ def test_route_preview_to_s3_public(
     did = ds_dict["id"]
     resp = app.get(
         f"/dataset/{did}/resource/{rid}/preview.jpg",
+        follow_redirects=True,
         )
 
     endpoint = dcor_shared.get_ckan_config_option(
@@ -178,7 +181,8 @@ def test_route_s3_redirect_preview_to_s3_private(
     # We should not be authorized to access the resource without API token
     resp0 = app.get(
         f"/dataset/{did}/resource/{rid}/preview.jpg",
-        status=404
+        status=404,
+        follow_redirects=True,
         )
     assert len(resp0.history) == 0
 
@@ -186,6 +190,7 @@ def test_route_s3_redirect_preview_to_s3_private(
     resp = app.get(
         f"/dataset/{did}/resource/{rid}/preview.jpg",
         headers={u"authorization": user["token"]},
+        follow_redirects=True,
         )
 
     endpoint = dcor_shared.get_ckan_config_option(
@@ -232,6 +237,7 @@ def test_route_s3_preview_to_s3_public(
     did = ds_dict["id"]
     resp = app.get(
         f"/dataset/{did}/resource/{rid}/preview.jpg",
+        follow_redirects=True,
         )
 
     endpoint = dcor_shared.get_ckan_config_option(
