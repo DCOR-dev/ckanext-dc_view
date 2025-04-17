@@ -22,12 +22,8 @@ data_path = pathlib.Path(__file__).parent / "data"
 @mock.patch('ckan.plugins.toolkit.enqueue_job',
             side_effect=synchronous_enqueue_job)
 def test_route_redirect_preview_to_s3_private(
-        enqueue_job_mock, app, tmpdir, create_with_upload, monkeypatch,
-        ckan_config):
-    monkeypatch.setitem(ckan_config, 'ckan.storage_path', str(tmpdir))
-    monkeypatch.setattr(ckan.lib.uploader,
-                        'get_storage_path',
-                        lambda: str(tmpdir))
+        enqueue_job_mock, app, tmpdir, create_with_upload_no_temp,
+        monkeypatch):
     monkeypatch.setattr(
         ckanext.dcor_schemas.plugin,
         'DISABLE_AFTER_DATASET_CREATE_FOR_CONCURRENT_JOB_TESTS',
@@ -45,7 +41,7 @@ def test_route_redirect_preview_to_s3_private(
     # create a dataset
     ds_dict, res_dict = make_dataset(
         create_context=create_context,
-        create_with_upload=create_with_upload,
+        create_with_upload=create_with_upload_no_temp,
         resource_path=data_path / "calibration_beads_47.rtdc",
         activate=True,
         private=True
@@ -95,12 +91,8 @@ def test_route_redirect_preview_to_s3_private(
 @mock.patch('ckan.plugins.toolkit.enqueue_job',
             side_effect=synchronous_enqueue_job)
 def test_route_redirect_preview_to_s3_public(
-        enqueue_job_mock, app, tmpdir, create_with_upload, monkeypatch,
-        ckan_config):
-    monkeypatch.setitem(ckan_config, 'ckan.storage_path', str(tmpdir))
-    monkeypatch.setattr(ckan.lib.uploader,
-                        'get_storage_path',
-                        lambda: str(tmpdir))
+        enqueue_job_mock, app, tmpdir, create_with_upload_no_temp,
+        monkeypatch):
     monkeypatch.setattr(
         ckanext.dcor_schemas.plugin,
         'DISABLE_AFTER_DATASET_CREATE_FOR_CONCURRENT_JOB_TESTS',
@@ -108,7 +100,7 @@ def test_route_redirect_preview_to_s3_public(
 
     # create a dataset
     ds_dict, res_dict = make_dataset(
-        create_with_upload=create_with_upload,
+        create_with_upload=create_with_upload_no_temp,
         resource_path=data_path / "calibration_beads_47.rtdc",
         activate=True)
     rid = res_dict["id"]
