@@ -31,12 +31,7 @@ data_path = pathlib.Path(__file__).parent / "data"
 @pytest.mark.usefixtures('clean_db', 'with_request_context')
 @mock.patch('ckan.plugins.toolkit.enqueue_job',
             side_effect=synchronous_enqueue_job)
-def test_create_preview_s3_job(enqueue_job_mock, monkeypatch):
-    monkeypatch.setattr(
-        ckanext.dcor_schemas.plugin,
-        'DISABLE_AFTER_DATASET_CREATE_FOR_CONCURRENT_JOB_TESTS',
-        True)
-
+def test_create_preview_s3_job(enqueue_job_mock):
     user = factories.User()
     owner_org = factories.Organization(users=[{
         'name': user['id'],
