@@ -16,9 +16,6 @@ docker exec -u root ${CKAN_CONTAINER} bash -c "
   # Install ckanext-dc_view and its test requirements
   pip install .;
   pip install -r ./ckanext/dc_view/tests/requirements.txt;
-
-  # Change ownership so that 'ckan' user can use the virtual environment
-  chown -R ckan:ckan-sys ${EXTENSION_PATH}/venv
 "
 
 # Run tests on GitHub runner where container gets permissions from.
