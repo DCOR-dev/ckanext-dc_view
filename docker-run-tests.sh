@@ -10,11 +10,6 @@ EXTENSION_PATH="/srv/app/src_extensions/"
 docker exec -u root ${CKAN_CONTAINER} bash -c "
   cd ${EXTENSION_PATH};
 
-  # Create a venv with systme site packages
-  python3 -m venv --system-site-packages venv;
-  source venv/bin/activate;
-  pip install --upgrade pip wheel;
-
   # Update dcor libraries
   dcor update --yes;
 
@@ -30,7 +25,6 @@ docker exec -u root ${CKAN_CONTAINER} bash -c "
 echo "Running tests in the virtual environment..."
 docker exec ${CKAN_CONTAINER} bash -c "
   cd ${EXTENSION_PATH};
-  source venv/bin/activate;
   # Run coverage
   coverage run --source=ckanext.dc_view --omit=*tests* -m pytest -p no:warnings ckanext;
 "
@@ -38,7 +32,6 @@ docker exec ${CKAN_CONTAINER} bash -c "
 # Generate the XML report
 docker exec ${CKAN_CONTAINER} bash -c "
   cd ${EXTENSION_PATH};
-  source venv/bin/activate;
   coverage xml;
 "
 
