@@ -15,7 +15,6 @@ import requests
 
 import ckan.tests.factories as factories
 
-import ckanext.dcor_schemas.plugin
 import dcor_shared
 from dcor_shared import s3cc
 from dcor_shared.testing import (
@@ -25,8 +24,6 @@ from dcor_shared.testing import (
 data_path = pathlib.Path(__file__).parent / "data"
 
 
-# We need the dcor_depot extension to make sure that the symbolic-
-# linking pipeline is used.
 @pytest.mark.ckan_config('ckan.plugins', 'dcor_depot dcor_schemas dc_view')
 @pytest.mark.usefixtures('clean_db', 'with_request_context')
 @mock.patch('ckan.plugins.toolkit.enqueue_job',
@@ -37,8 +34,7 @@ def test_create_preview_s3_job(enqueue_job_mock):
         'name': user['id'],
         'capacity': 'admin'
     }])
-    # Note: `call_action` bypasses authorization!
-    # create 1st dataset
+
     create_context = {'ignore_auth': False, 'user': user['name'],
                       'api_version': 3}
     dataset = make_dataset_via_s3(create_context,
@@ -51,6 +47,7 @@ def test_create_preview_s3_job(enqueue_job_mock):
         dataset_id=dataset['id'],
         create_context=create_context
     )
+
     # the file is uploaded to S3
     assert s3cc.artifact_exists(resource_id=rid,
                                 artifact="resource")
@@ -59,25 +56,17 @@ def test_create_preview_s3_job(enqueue_job_mock):
                                 artifact="preview")
 
 
-# We need the dcor_depot extension to make sure that the symbolic-
-# linking pipeline is used.
-@pytest.mark.ckan_config('ckan.plugins', 'dcor_depot dc_view dcor_schemas')
+@pytest.mark.ckan_config('ckan.plugins', 'dcor_depot dcor_schemas dc_view')
 @pytest.mark.usefixtures('clean_db', 'with_request_context')
 @mock.patch('ckan.plugins.toolkit.enqueue_job',
             side_effect=synchronous_enqueue_job)
-def test_create_preview_s3_job_alternate(enqueue_job_mock, monkeypatch):
-    monkeypatch.setattr(
-        ckanext.dcor_schemas.plugin,
-        'DISABLE_AFTER_DATASET_CREATE_FOR_CONCURRENT_JOB_TESTS',
-        True)
-
+def test_create_preview_s3_job_alternate(enqueue_job_mock):
     user = factories.User()
     owner_org = factories.Organization(users=[{
         'name': user['id'],
         'capacity': 'admin'
     }])
-    # Note: `call_action` bypasses authorization!
-    # create 1st dataset
+
     create_context = {'ignore_auth': False,
                       'user': user['name'],
                       'api_version': 3}
