@@ -139,17 +139,11 @@ def test_route_redirect_preview_to_s3_public(
 
 @pytest.mark.ckan_config('ckan.plugins',
                          'dcor_depot dcor_schemas dc_serve dc_view')
-@pytest.mark.usefixtures('clean_db', 'with_request_context')
+@pytest.mark.usefixtures('clean_db')
 @mock.patch('ckan.plugins.toolkit.enqueue_job',
             side_effect=synchronous_enqueue_job)
 def test_route_s3_redirect_preview_to_s3_private(
-        enqueue_job_mock, app, tmpdir, monkeypatch,
-        ckan_config):
-    monkeypatch.setitem(ckan_config, 'ckan.storage_path', str(tmpdir))
-    monkeypatch.setattr(ckan.lib.uploader,
-                        'get_storage_path',
-                        lambda: str(tmpdir))
-
+        enqueue_job_mock, app, tmpdir, monkeypatch):
     user = factories.UserWithToken()
     user_obj = ckan.model.User.by_name(user["name"])
     monkeypatch.setattr(ckan.common,
@@ -209,17 +203,11 @@ def test_route_s3_redirect_preview_to_s3_private(
 
 @pytest.mark.ckan_config('ckan.plugins',
                          'dcor_depot dcor_schemas dc_serve dc_view')
-@pytest.mark.usefixtures('clean_db', 'with_request_context')
+@pytest.mark.usefixtures('clean_db')
 @mock.patch('ckan.plugins.toolkit.enqueue_job',
             side_effect=synchronous_enqueue_job)
 def test_route_s3_redirect_preview_to_s3_public(
-        enqueue_job_mock, app, tmpdir, monkeypatch,
-        ckan_config):
-    monkeypatch.setitem(ckan_config, 'ckan.storage_path', str(tmpdir))
-    monkeypatch.setattr(ckan.lib.uploader,
-                        'get_storage_path',
-                        lambda: str(tmpdir))
-
+        enqueue_job_mock, app, tmpdir, monkeypatch):
     # create a dataset
     ds_dict, res_dict = make_dataset_via_s3(
         resource_path=data_path / "calibration_beads_47.rtdc",
