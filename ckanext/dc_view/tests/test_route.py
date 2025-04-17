@@ -94,7 +94,7 @@ def test_route_redirect_preview_to_s3_private(
 @pytest.mark.usefixtures('clean_db', 'with_request_context')
 @mock.patch('ckan.plugins.toolkit.enqueue_job',
             side_effect=synchronous_enqueue_job)
-def test_route_preview_to_s3_public(
+def test_route_redirect_preview_to_s3_public(
         enqueue_job_mock, app, tmpdir, create_with_upload, monkeypatch,
         ckan_config):
     monkeypatch.setitem(ckan_config, 'ckan.storage_path', str(tmpdir))
@@ -212,7 +212,7 @@ def test_route_s3_redirect_preview_to_s3_private(
 @pytest.mark.usefixtures('clean_db', 'with_request_context')
 @mock.patch('ckan.plugins.toolkit.enqueue_job',
             side_effect=synchronous_enqueue_job)
-def test_route_s3_preview_to_s3_public(
+def test_route_s3_redirect_preview_to_s3_public(
         enqueue_job_mock, app, tmpdir, monkeypatch,
         ckan_config):
     monkeypatch.setitem(ckan_config, 'ckan.storage_path', str(tmpdir))
