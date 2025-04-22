@@ -1,4 +1,4 @@
-from ckan.common import c
+from ckan.common import current_user
 from ckan import logic
 import ckan.model as model
 import ckan.plugins.toolkit as toolkit
@@ -18,7 +18,7 @@ def dcpreview(ds_id, res_id):
     """
     # Code borrowed from ckan/controllers/package.py:resource_download
     context = {'model': model, 'session': model.Session,
-               'user': c.user, 'auth_user_obj': c.userobj}
+               'user': current_user.name, 'auth_user_obj': current_user}
     did = str(ds_id)
     rid = str(res_id)
     try:
