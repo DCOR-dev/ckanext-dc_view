@@ -19,9 +19,9 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres
         options: |
-          --health-cmd pg_isready \
-          --health-interval 10s \
-          --health-timeout 5s \
+          --health-cmd "pg_isready"
+          --health-interval 10s
+          --health-timeout 5s
           --health-retries 10
       redis:
         image: redis:alpine
@@ -33,7 +33,7 @@ jobs:
           MINIO_NEW_USER: dcor
           MINIO_NEW_SECRET_KEY: secretkey12345678
         options: |
-          --health-cmd "pg_isready"
+          --health-cmd "curl -f http://localhost:9000/minio/health/ready || exit 1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
