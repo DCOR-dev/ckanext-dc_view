@@ -1,47 +1,75 @@
 name: Checks
-
-on:
-  push:
-  pull_request:
-
-# only allow one job to run
-concurrency: general_workflow
+on: [push, pull_request]
 
 jobs:
   test:
+    name: DCOR-CKAN
     runs-on: ubuntu-latest
+    container:
+      image: raghavaalajangi95/dcor-ckan:latest
+      options: --user root
+
+    services:
+      solr:
+        image: ckan/ckan-solr:2.11-solr9
+      postgres:
+        image: raghavaalajangi95/dcor-postgresql:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        options: |
+          --health-cmd pg_isready \
+          --health-interval 10s \
+          --health-timeout 5s \
+          --health-retries 10
+      redis:
+        image: redis:alpine
+      minio:
+        image: raghavaalajangi95/dcor-minio:latest
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+          MINIO_NEW_USER: dcor
+          MINIO_NEW_SECRET_KEY: secretkey12345678
+        options: |
+          --health-cmd "curl -f http://localhost:9000/minio/health/ready || exit 1" \
+          --health-interval 10s \
+          --health-timeout 5s \
+          --health-retries 10
+        ports:
+          - 9000:9000
+
+    env:
+      CKAN_SQLALCHEMY_URL: postgresql://ckan_default:pass@postgres/ckan_test
+      CKAN_DATASTORE_WRITE_URL: postgresql://datastore_write:pass@postgres/datastore_test
+      CKAN_DATASTORE_READ_URL: postgresql://datastore_read:pass@postgres/datastore_test
+      CKAN_SOLR_URL: http://solr:8983/solr/ckan
+      CKAN_REDIS_URL: redis://redis:6379/1
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-    - name: Set up Docker
-      uses: docker/setup-buildx-action@v2
+      - name: Install requirements
+        run: |
+          pip install .
+          pip install -r ./ckanext/dc_view/tests/requirements.txt
+          # Replace default path to CKAN core config file with the one on the container
+          sed -i -e 's/use = config:.*/use = config:\/srv\/app\/src\/ckan\/test-core.ini/' docker-test.ini
 
-    - name: Install Docker Compose
-      run: |
-        sudo curl -L "https://github.com/docker/compose/releases/download/v2.17.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-        sudo chmod +x /usr/local/bin/docker-compose
-        docker-compose --version  # Verify installation
+      - name: Setup extension
+        run: |
+          ckan -c test.ini db init
 
-    - name: Start Docker Compose services
-      run: docker-compose --env-file docker-ci.env -f docker-compose.ci.yml up -d
+      - name: Wait for MinIO to be ready
+        run: |
+          until curl -f http://minio:9000/minio/health/ready; do sleep 2; done
 
-    - name: Wait for CKAN to be healthy
-      run: docker exec dcor_ckan bash -c "while ! wget -qO- http://localhost:5000; do sleep 5; done"
-
-    - name: List running services (for debugging)
-      run: docker-compose -f docker-compose.ci.yml ps
-
-    - name: Run Tests
-      run: bash ./docker-run-tests.sh
-
-    - name: Upload Coverage to GitHub
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: coverage.xml
-
-    - name: Bring Down Docker Compose
-      if: always()
-      run: docker-compose -f docker-compose.ci.yml down
+      - name: Run tests
+        run: |
+          pytest -v --ckan-ini=test.ini \
+             --cov=ckanext.dc_view \
+             --cov-report=xml \
+             --cov-append \
+             --disable-warnings \
+             ckanext/dc_view/tests/
