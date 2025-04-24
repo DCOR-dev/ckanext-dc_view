@@ -18,6 +18,12 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres
+          CKAN_DB_USER: ckandbuser
+          CKAN_DB_PASSWORD: ckandbpassword
+          CKAN_DB: ckandb
+          DATASTORE_READONLY_USER: datastore_ro
+          DATASTORE_READONLY_PASSWORD: datastore
+          DATASTORE_DB: datastore
         options: --health-cmd "pg_isready" --health-interval 10s --health-timeout 5s --health-retries 10
       redis:
         image: redis:alpine
@@ -31,6 +37,7 @@ jobs:
         options: --health-cmd "curl -f http://localhost:9000/minio/health/ready || exit 1" --health-interval 10s --health-timeout 5s --health-retries 10
         ports:
           - 9000:9000
+          - 9001:9001
 
     env:
       CKAN_SQLALCHEMY_URL: postgresql://ckan_default:pass@postgres/ckan_test
