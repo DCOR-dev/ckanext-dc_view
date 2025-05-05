@@ -49,12 +49,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Wait for CKAN to be healthy
+        run: |
+          for i in {1..60}; do
+            if curl -f http://localhost:5000; then
+              echo "CKAN is up!"
+              break
+            fi
+            echo "Waiting for CKAN to be ready..."
+            sleep 5
+          done
+
       - name: Install DCOR extensions inside the DCOR-CKAN container
         run: |
           pip3 install dcor_control==0.12.6
           dcor inspect --assume-yes
 
-      - name: Install requirements
+      - name: Install extention & requirements
         run: |
           pip install .
           pip install -r ./ckanext/dc_view/tests/requirements.txt
