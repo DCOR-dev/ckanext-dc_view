@@ -6,7 +6,7 @@ jobs:
     name: DCOR-CKAN
     runs-on: ubuntu-latest
     container:
-      image: raghavaalajangi95/dcor-ckan:latest
+      image: ckan/ckan:2.11:latest
       options: --user root
 
     services:
@@ -48,6 +48,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Show hostname
+        run: hostname
 
       - name: Wait for CKAN to be healthy
         run: |
