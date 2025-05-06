@@ -6,7 +6,7 @@ jobs:
     name: DCOR-CKAN
     runs-on: ubuntu-latest
     container:
-      image: ckan/ckan:2.11:latest
+      image: ckan/ckan-dev:2.11.1
       options: --user root
 
     services:
