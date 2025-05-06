@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ckan/ckan-dev:2.11.1
-      options: --user root
+      options: --user root --hostname dcor-docker
 
     services:
       solr:
