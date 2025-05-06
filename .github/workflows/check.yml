@@ -71,7 +71,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest -v --ckan-ini=test.ini \
+          pytest -v --ckan-ini=docker-test.ini \
              --cov=ckanext.dc_view \
              --cov-report=xml \
              --cov-append \
