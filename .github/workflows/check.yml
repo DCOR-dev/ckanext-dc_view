@@ -69,7 +69,7 @@ jobs:
 
       - name: Wait for MinIO to be ready
         run: |
-          until curl -f http://minio:9000/minio/health/ready; do sleep 2; done
+          until wget -q http://minio:9000/minio/health/ready; do sleep 2; done
 
       - name: Run tests
         run: |
