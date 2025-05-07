@@ -64,7 +64,7 @@ jobs:
 
       - name: Install extension and requirements
         run: |
-          pip install .
+          pip install -e .
           pip install -r ./ckanext/dc_view/tests/requirements.txt
 
       - name: Wait for MinIO to be ready
