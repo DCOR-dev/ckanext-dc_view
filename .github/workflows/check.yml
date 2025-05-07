@@ -51,7 +51,7 @@ jobs:
 
       - name: Install DCOR extensions inside the DCOR-CKAN container
         run: |
-          pip3 install dcor_control==0.12.6
+          pip3 install dcor_control
           dcor inspect --assume-yes
 
       - name: Install extention & requirements
