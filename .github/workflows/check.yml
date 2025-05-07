@@ -70,7 +70,7 @@ jobs:
           dcor develop --yes
           dcor inspect --assume-yes
 
-      - name: Install extension and requirements
+      - name: Install current extension and its testing requirements
         run: |
           pip install -e .
           pip install -r ./ckanext/dc_view/tests/requirements.txt
