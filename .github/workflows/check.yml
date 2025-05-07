@@ -57,6 +57,7 @@ jobs:
           # initialize CKAN database
           ckan -c /srv/app/ckan.ini db init
           # fix location of allowed datastore commands
+          # https://github.com/ckan/ckan/issues/8926
           mkdir -p /srv/app/ckanext/datastore/tests/
           wget -O /srv/app/ckanext/datastore/tests/allowed_functions.txt https://raw.githubusercontent.com/ckan/ckan/refs/heads/master/ckanext/datastore/allowed_functions.txt
           # complement configuration
