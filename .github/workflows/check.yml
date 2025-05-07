@@ -53,6 +53,7 @@ jobs:
         run: |
           # pip3 install dcor_control
           pip3 install git+https://github.com/DCOR-dev/dcor_control
+          cat /srv/app/ckan.ini
           dcor inspect --assume-yes
 
       - name: Install extension and requirements
