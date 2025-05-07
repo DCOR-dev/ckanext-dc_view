@@ -5,7 +5,8 @@ jobs:
   test:
     strategy:
       matrix:
-        ckan-version: ["2.11"]
+        ckan-version: ["2.11", "2.10"]
+        dcor_control: ["develop", "pypi"]
       fail-fast: false
 
     name: DCOR-CKAN ${{ matrix.ckan-version }}
@@ -61,6 +62,12 @@ jobs:
           mkdir -p /srv/app/ckanext/datastore/tests/
           wget -O /srv/app/ckanext/datastore/tests/allowed_functions.txt https://raw.githubusercontent.com/ckan/ckan/refs/heads/master/ckanext/datastore/allowed_functions.txt
           # complement configuration
+          dcor inspect --assume-yes
+
+      - name: Install latest DCOR extensions from GitHub
+        if: matrix.dcor_control == 'develop'
+        run: |
+          dcor develop --yes
           dcor inspect --assume-yes
 
       - name: Install extension and requirements
