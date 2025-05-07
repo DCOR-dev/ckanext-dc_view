@@ -18,8 +18,8 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres
-          CKAN_DB_USER: ckandbuser
-          CKAN_DB_PASSWORD: ckandbpassword
+          CKAN_DB_USER: ckan_default
+          CKAN_DB_PASSWORD: ckan_default_password
           CKAN_DB: ckandb
           DATASTORE_READONLY_USER: datastore_ro
           DATASTORE_READONLY_PASSWORD: datastore
@@ -49,7 +49,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install DCOR extensions
+      - name: Install and setup DCOR
         run: |
           # pip3 install dcor_control
           pip3 install git+https://github.com/DCOR-dev/dcor_control
