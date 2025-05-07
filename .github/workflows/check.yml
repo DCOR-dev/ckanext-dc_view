@@ -5,11 +5,11 @@ jobs:
   test:
     strategy:
       matrix:
-        ckan-version: ["2.11", "2.10"]
+        ckan-version: ["2.11"]
         dcor_control: ["develop", "pypi"]
       fail-fast: false
 
-    name: DCOR-CKAN ${{ matrix.ckan-version }}
+    name: DCOR-CKAN ${{ matrix.ckan-version }} ${{ matrix.dcor_control }}
     runs-on: ubuntu-latest
     container:
       image: ckan/ckan-dev:${{ matrix.ckan-version }}
