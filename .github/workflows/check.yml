@@ -3,30 +3,29 @@ on: [push, pull_request]
 
 jobs:
   test:
-    name: DCOR-CKAN
+    strategy:
+      matrix:
+        ckan-version: ["2.11"]
+      fail-fast: false
+
+    name: DCOR-CKAN ${{ matrix.ckan-version }}
     runs-on: ubuntu-latest
     container:
-      image: ckan/ckan-dev:2.11.1
+      image: ckan/ckan-dev:${{ matrix.ckan-version }}
       options: --user root --hostname dcor-dev-docker
 
     services:
       solr:
-        image: ckan/ckan-solr:2.11-solr9
+        image: ckan/ckan-solr:${{ matrix.ckan-version }}-solr9
       postgres:
-        image: raghavaalajangi95/dcor-postgresql:latest
+        image: ckan/ckan-postgres-dev:${{ matrix.ckan-version }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres
-          CKAN_DB_USER: ckan_default
-          CKAN_DB_PASSWORD: ckan_default_password
-          CKAN_DB: ckandb
-          DATASTORE_READONLY_USER: datastore_ro
-          DATASTORE_READONLY_PASSWORD: datastore
-          DATASTORE_DB: datastore
         options: --health-cmd "pg_isready" --health-interval 10s --health-timeout 5s --health-retries 10
       redis:
-        image: redis:alpine
+        image: redis:3
       minio:
         image: raghavaalajangi95/dcor-minio:latest
         env:
