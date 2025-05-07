@@ -67,10 +67,6 @@ jobs:
           pip install .
           pip install -r ./ckanext/dc_view/tests/requirements.txt
 
-      - name: Setup extension
-        run: |
-          ckan -c docker-test.ini db init
-
       - name: Wait for MinIO to be ready
         run: |
           until curl -f http://minio:9000/minio/health/ready; do sleep 2; done
