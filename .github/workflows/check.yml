@@ -52,6 +52,7 @@ jobs:
         run: |
           # pip3 install dcor_control
           pip3 install git+https://github.com/DCOR-dev/dcor_control
+          cp /srv/app/src/ckan/test-core.ini /srv/app/ckan.ini
           ckan -c /srv/app/ckan.ini db init 
           dcor inspect --assume-yes
 
@@ -59,8 +60,6 @@ jobs:
         run: |
           pip install .
           pip install -r ./ckanext/dc_view/tests/requirements.txt
-          # Replace default path to CKAN core config file with the one on the container
-          sed -i -e 's/use = config:.*/use = config:\/srv\/app\/src\/ckan\/test-core.ini/' docker-test.ini
 
       - name: Setup extension
         run: |
@@ -72,7 +71,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest -v --ckan-ini=docker-test.ini \
+          pytest -v --ckan-ini=/srv/app/ckan.ini \
              --cov=ckanext.dc_view \
              --cov-report=xml \
              --cov-append \
