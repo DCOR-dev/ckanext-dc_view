@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ckan/ckan-dev:2.11.1
-      options: --user root --hostname dcor-docker
+      options: --user root --hostname dcor-dev-docker
 
     services:
       solr:
@@ -49,12 +49,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install DCOR extensions inside the DCOR-CKAN container
+      - name: Install DCOR extensions
         run: |
           pip3 install dcor_control
           dcor inspect --assume-yes
 
-      - name: Install extention & requirements
+      - name: Install extension and requirements
         run: |
           pip install .
           pip install -r ./ckanext/dc_view/tests/requirements.txt
