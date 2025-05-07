@@ -51,7 +51,8 @@ jobs:
 
       - name: Install DCOR extensions
         run: |
-          pip3 install dcor_control
+          # pip3 install dcor_control
+          pip3 install git+https://github.com/DCOR-dev/dcor_control
           dcor inspect --assume-yes
 
       - name: Install extension and requirements
