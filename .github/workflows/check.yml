@@ -41,8 +41,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
-          # Run MinIO in distributed mode, not filesystem mode
-          server --console-address ":9001" http://localhost:9000/data
         ports:
           - 9000:9000
           - 9001:9001
@@ -69,7 +67,7 @@ jobs:
 
           mc alias set local http://minio:9000 "${MINIO_ROOT_USER}" "${MINIO_ROOT_PASSWORD}"
           mc admin user add local  "${MINIO_NEW_USER}" "${MINIO_NEW_SECRET_KEY}" || echo "User already exists"
-          mc admin policy attach local readwrite --user="${MINIO_NEW_USER}" || echo "Policy already attached"
+          # mc admin policy attach local readwrite --user="${MINIO_NEW_USER}" || echo "Policy already attached"
           mc mb local/ckan || echo "Bucket already exists"
           mc policy set download local/ckan/storage || echo "Policy already set"
 
