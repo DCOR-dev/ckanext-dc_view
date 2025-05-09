@@ -41,6 +41,8 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
+          # Run MinIO in distributed mode, not filesystem mode
+          server --console-address ":9001" http://localhost:9000/data
         ports:
           - 9000:9000
           - 9001:9001
