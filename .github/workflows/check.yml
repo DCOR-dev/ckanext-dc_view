@@ -28,13 +28,17 @@ jobs:
       redis:
         image: redis:3
       minio:
-        image: raghavaalajangi95/dcor-minio:latest
+        image: minio/minio:latest
         env:
           MINIO_ROOT_USER: minioadmin
           MINIO_ROOT_PASSWORD: minioadmin
-          MINIO_NEW_USER: dcor
-          MINIO_NEW_SECRET_KEY: secretkey12345678
-        options: --health-cmd "curl -f http://localhost:9000/minio/health/ready || exit 1" --health-interval 10s --health-timeout 5s --health-retries 10
+        options: >-
+          --entrypoint "minio"
+          --health-cmd "curl -f http://localhost:9000/minio/health/ready || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          server --console-address :9001 /data
         ports:
           - 9000:9000
           - 9001:9001
@@ -45,9 +49,25 @@ jobs:
       CKAN_DATASTORE_READ_URL: postgresql://datastore_read:pass@postgres/datastore_test
       CKAN_SOLR_URL: http://solr:8983/solr/ckan
       CKAN_REDIS_URL: redis://redis:6379/1
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_NEW_USER: dcor
+      MINIO_NEW_USER_KEY: secretkey12345678
+
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Configure MinIO (user, bucket, policy)
+        run: |
+          curl -sO https://dl.min.io/client/mc/release/linux-amd64/mc
+          chmod +x mc && mv mc /usr/local/bin/mc
+
+          mc alias set local http://minio:9000 "${MINIO_ROOT_USER}" "${MINIO_ROOT_PASSWORD}"
+          mc admin user add local  "${MINIO_NEW_USER}" "${MINIO_NEW_SECRET_KEY}" || echo "User already exists"
+          mc admin policy attach local readwrite --user="${MINIO_NEW_USER}" || echo "Policy already attached"
+          mc mb local/ckan || echo "Bucket already exists"
+          mc policy set download local/ckan/storage || echo "Policy already set"
 
       - name: Install and setup DCOR
         run: |
