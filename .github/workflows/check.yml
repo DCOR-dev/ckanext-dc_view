@@ -24,7 +24,11 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres
-        options: --health-cmd "pg_isready" --health-interval 10s --health-timeout 5s --health-retries 10
+        options: >-
+          --health-cmd "pg_isready" 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 10
       redis:
         image: redis:3
       minio:
@@ -58,7 +62,7 @@ jobs:
 
       - name: Configure MinIO (user, bucket, policy)
         run: |
-          curl -sO https://dl.min.io/client/mc/release/linux-amd64/mc
+          wget -q https://dl.min.io/client/mc/release/linux-amd64/mc
           chmod +x mc && mv mc /usr/local/bin/mc
 
           mc alias set local http://minio:9000 "${MINIO_ROOT_USER}" "${MINIO_ROOT_PASSWORD}"
@@ -92,10 +96,6 @@ jobs:
         run: |
           pip install -e .
           pip install -r ./ckanext/dc_view/tests/requirements.txt
-
-      - name: Wait for MinIO to be ready
-        run: |
-          until wget -q http://minio:9000/minio/health/ready; do sleep 2; done
 
       - name: Run tests
         run: |
