@@ -54,7 +54,7 @@ jobs:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
       MINIO_NEW_USER: dcor
-      MINIO_NEW_USER_KEY: secretkey12345678
+      MINIO_NEW_SECRET_KEY: secretkey12345678
 
 
     steps:
