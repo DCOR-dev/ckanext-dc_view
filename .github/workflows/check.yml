@@ -1,47 +1,104 @@
 name: Checks
-
-on:
-  push:
-  pull_request:
-
-# only allow one job to run
-concurrency: general_workflow
+on: [push, pull_request]
 
 jobs:
   test:
+    strategy:
+      matrix:
+        ckan-version: ["2.11"]
+        dcor_control: ["develop", "pypi"]
+      fail-fast: false
+
+    name: DCOR-CKAN ${{ matrix.ckan-version }} ${{ matrix.dcor_control }}
     runs-on: ubuntu-latest
+    container:
+      image: ckan/ckan-dev:${{ matrix.ckan-version }}
+      options: --user root --hostname dcor-dev-docker
+
+    services:
+      solr:
+        image: ckan/ckan-solr:${{ matrix.ckan-version }}-solr9
+      postgres:
+        image: ckan/ckan-postgres-dev:${{ matrix.ckan-version }}
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        options: >-
+          --health-cmd "pg_isready" 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 10
+      redis:
+        image: redis:3
+      minio:
+        image: raghavaalajangi95/dcor-minio:latest
+        # Note:
+        # The official MinIO setup uses standalone mode, which has limitations:
+        # - Certain 'mc admin' commands, such as user and policy management, are not supported.
+        # - Using these commands will result in errors like:
+        #   "This 'admin' API is not supported by server in 'mode-server-fs'"
+        # - `minio/minio:edge-cicd` container from MinIO is a good alternative, 
+        # but it is still not supporting 'mc admin policy' command and the container is not managed properly.
+        # References:
+        # - https://github.com/minio/minio/discussions/16099
+        # - https://github.com/orgs/community/discussions/26688#discussioncomment-4183701
+        # - https://stackoverflow.com/questions/64031598/creating-a-minios3-container-inside-a-github-actions-yml-file/64188150#64188150
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+          MINIO_NEW_USER: dcor
+          MINIO_NEW_SECRET_KEY: secretkey12345678
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/minio/health/ready || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 9000:9000
+          - 9001:9001
+
+    env:
+      CKAN_SQLALCHEMY_URL: postgresql://ckan_default:pass@postgres/ckan_test
+      CKAN_DATASTORE_WRITE_URL: postgresql://datastore_write:pass@postgres/datastore_test
+      CKAN_DATASTORE_READ_URL: postgresql://datastore_read:pass@postgres/datastore_test
+      CKAN_SOLR_URL: http://solr:8983/solr/ckan
+      CKAN_REDIS_URL: redis://redis:6379/1
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-    - name: Set up Docker
-      uses: docker/setup-buildx-action@v2
+      - name: Install and setup DCOR
+        run: |
+          # pip3 install dcor_control
+          pip3 install git+https://github.com/DCOR-dev/dcor_control
+          # use test-core.ini as default
+          cp /srv/app/src/ckan/test-core.ini /srv/app/ckan.ini
+          # initialize CKAN database
+          ckan -c /srv/app/ckan.ini db init
+          # fix location of allowed datastore commands
+          # https://github.com/ckan/ckan/issues/8926
+          mkdir -p /srv/app/ckanext/datastore/tests/
+          wget -O /srv/app/ckanext/datastore/tests/allowed_functions.txt https://raw.githubusercontent.com/ckan/ckan/refs/heads/master/ckanext/datastore/allowed_functions.txt
+          # complement configuration
+          dcor inspect --assume-yes
 
-    - name: Install Docker Compose
-      run: |
-        sudo curl -L "https://github.com/docker/compose/releases/download/v2.17.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-        sudo chmod +x /usr/local/bin/docker-compose
-        docker-compose --version  # Verify installation
+      - name: Install latest DCOR extensions from GitHub
+        if: matrix.dcor_control == 'develop'
+        run: |
+          dcor develop --yes
+          dcor inspect --assume-yes
 
-    - name: Start Docker Compose services
-      run: docker-compose --env-file docker-ci.env -f docker-compose.ci.yml up -d
+      - name: Install extension and requirements
+        run: |
+          pip install -e .
+          pip install -r ./ckanext/dc_view/tests/requirements.txt
 
-    - name: Wait for CKAN to be healthy
-      run: docker exec dcor_ckan bash -c "while ! wget -qO- http://localhost:5000; do sleep 5; done"
-
-    - name: List running services (for debugging)
-      run: docker-compose -f docker-compose.ci.yml ps
-
-    - name: Run Tests
-      run: bash ./docker-run-tests.sh
-
-    - name: Upload Coverage to GitHub
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: coverage.xml
-
-    - name: Bring Down Docker Compose
-      if: always()
-      run: docker-compose -f docker-compose.ci.yml down
+      - name: Run tests
+        run: |
+          pytest -v --ckan-ini=/srv/app/ckan.ini \
+             --cov=ckanext.dc_view \
+             --cov-report=xml \
+             --cov-append \
+             --disable-warnings \
+             ckanext/dc_view/tests/
