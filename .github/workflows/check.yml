@@ -28,17 +28,15 @@ jobs:
       redis:
         image: redis:3
       minio:
-        image: minio/minio:latest
+        image: minio/minio:edge-cicd
         env:
           MINIO_ROOT_USER: minioadmin
           MINIO_ROOT_PASSWORD: minioadmin
         options: >-
-          --entrypoint "minio"
           --health-cmd "curl -f http://localhost:9000/minio/health/ready || exit 1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
-          server --console-address :9001 /data
         ports:
           - 9000:9000
           - 9001:9001
