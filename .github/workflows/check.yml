@@ -67,7 +67,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
       - name: Install and setup DCOR
         run: |
           # pip3 install dcor_control
@@ -100,5 +101,4 @@ jobs:
              --cov=ckanext.dc_view \
              --cov-report=xml \
              --cov-append \
-             --disable-warnings \
              ckanext/dc_view/tests/
