@@ -45,7 +45,6 @@ def test_create_preview_s3_job(enqueue_job_mock):
         resource_path=path,
         organization_id=owner_org['id'],
         dataset_id=dataset['id'],
-        create_context=create_context
     )
 
     # the file is uploaded to S3

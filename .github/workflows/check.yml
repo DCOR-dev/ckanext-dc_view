@@ -71,8 +71,7 @@ jobs:
           fetch-depth: 0
       - name: Install and setup DCOR
         run: |
-          # pip3 install dcor_control
-          pip3 install git+https://github.com/DCOR-dev/dcor_control
+          pip3 install dcor_control
           # use test-core.ini as default
           cp /srv/app/src/ckan/test-core.ini /srv/app/ckan.ini
           # initialize CKAN database
@@ -80,7 +79,7 @@ jobs:
           # fix location of allowed datastore commands
           # https://github.com/ckan/ckan/issues/8926
           mkdir -p /srv/app/ckanext/datastore/tests/
-          wget -O /srv/app/ckanext/datastore/tests/allowed_functions.txt https://raw.githubusercontent.com/ckan/ckan/refs/heads/master/ckanext/datastore/allowed_functions.txt
+          printf 'upper\n"count"\n' > /srv/app/ckanext/datastore/tests/allowed_functions.txt
           # complement configuration
           dcor inspect --assume-yes
 
