@@ -24,7 +24,7 @@ from dcor_shared.testing import (
 data_path = pathlib.Path(__file__).parent / "data"
 
 
-@pytest.mark.ckan_config('ckan.plugins', 'dcor_depot dcor_schemas dc_view')
+@pytest.mark.ckan_config('ckan.plugins', 'dcor_schemas dc_view')
 @pytest.mark.usefixtures('clean_db', 'with_request_context')
 @mock.patch('ckan.plugins.toolkit.enqueue_job',
             side_effect=synchronous_enqueue_job)
@@ -55,7 +55,7 @@ def test_create_preview_s3_job(enqueue_job_mock):
                                 artifact="preview")
 
 
-@pytest.mark.ckan_config('ckan.plugins', 'dcor_depot dcor_schemas dc_view')
+@pytest.mark.ckan_config('ckan.plugins', 'dcor_schemas dc_view')
 @pytest.mark.usefixtures('clean_db', 'with_request_context')
 @mock.patch('ckan.plugins.toolkit.enqueue_job',
             side_effect=synchronous_enqueue_job)

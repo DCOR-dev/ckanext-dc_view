@@ -16,8 +16,7 @@ import pytest
 data_path = pathlib.Path(__file__).parent / "data"
 
 
-@pytest.mark.ckan_config('ckan.plugins',
-                         'dcor_depot dcor_schemas dc_serve dc_view')
+@pytest.mark.ckan_config('ckan.plugins', 'dcor_schemas dc_serve dc_view')
 @pytest.mark.usefixtures('clean_db')
 @mock.patch('ckan.plugins.toolkit.enqueue_job',
             side_effect=synchronous_enqueue_job)
@@ -80,8 +79,7 @@ def test_route_s3_redirect_preview_to_s3_private(
     assert len(redirect.location) > len(redirect_stem)
 
 
-@pytest.mark.ckan_config('ckan.plugins',
-                         'dcor_depot dcor_schemas dc_serve dc_view')
+@pytest.mark.ckan_config('ckan.plugins', 'dcor_schemas dc_serve dc_view')
 @pytest.mark.usefixtures('clean_db')
 @mock.patch('ckan.plugins.toolkit.enqueue_job',
             side_effect=synchronous_enqueue_job)
