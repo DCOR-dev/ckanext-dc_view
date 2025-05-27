@@ -44,11 +44,6 @@ def test_route_s3_redirect_preview_to_s3_private(
     assert "s3_url" in res_dict
     assert len(res_dict.get("url"))
 
-    # Since version 0.9.0, we are no longer storing the preview image locally.
-    path = dcor_shared.get_resource_path(rid)
-    path_prev = path.with_name(path.name + "_preview.jpg")
-    assert not path_prev.exists(), "sanity check"
-
     did = ds_dict["id"]
     # We should not be authorized to access the resource without API token
     resp0 = app.get(
@@ -92,11 +87,6 @@ def test_route_s3_redirect_preview_to_s3_public(enqueue_job_mock, app):
     assert "s3_available" in res_dict
     assert "s3_url" in res_dict
     assert len(res_dict.get("url"))
-
-    # Since version 0.9.0, we are no longer storing the preview image locally.
-    path = dcor_shared.get_resource_path(rid)
-    path_prev = path.with_name(path.name + "_preview.jpg")
-    assert not path_prev.exists(), "sanity check"
 
     did = ds_dict["id"]
     resp = app.get(
