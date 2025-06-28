@@ -23,7 +23,7 @@ def click_echo(message, am_on_a_new_line):
               is_flag=True)
 @click.command()
 def run_jobs_dc_view(modified_days=-1, force=False):
-    """Generate preview image for all RT-DC resources
+    """Generate preview image for all DC resources
 
     This also happens for draft datasets.
     """

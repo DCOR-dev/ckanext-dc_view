@@ -85,7 +85,7 @@ def overview_plot(rtdc_ds):
     Parameters
     ----------
     rtdc_ds: dclab.rtdc_dataset.core.RTDCBase
-        Full RT-DC dataset to plot
+        Full DC dataset to plot
 
     .. versionchanged:: 0.5.10
 

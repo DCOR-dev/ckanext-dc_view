@@ -11,7 +11,7 @@ resource has been created.
 
 This extensione implements:
 
-- A default view for RT-DC (mimetype) resources
+- A default view for DC (mimetype) resources
 - A background job that generates the preview image
 - A background job that uploads preview images to the S3 object store
 - A route that makes the preview image available via
