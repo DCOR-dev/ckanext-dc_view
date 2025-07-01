@@ -1,3 +1,5 @@
+1.0.1
+ - tests: remove invalid import
 1.0.0
  - declare first stable release
 0.12.0
