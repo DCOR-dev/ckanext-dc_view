@@ -44,7 +44,7 @@ jobs:
       redis:
         image: redis:3
       minio:
-        image: raghavaalajangi95/dcor-minio:latest
+        image: mpzpm/dcor-dev:minio-latest
         # Note:
         # The official MinIO setup uses standalone mode, which has limitations:
         # - Certain 'mc admin' commands, such as user and policy management, are not supported.
