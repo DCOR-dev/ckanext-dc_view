@@ -20,4 +20,5 @@ caption.dc_view {
 
 table.dc_view {
   border-top: 2px solid #5D7597;
+  overflow-wrap: anywhere;
 }
