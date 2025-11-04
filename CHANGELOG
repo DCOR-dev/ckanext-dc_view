@@ -1,5 +1,6 @@
 1.0.2
  - enh: wrap long strings in tabular info view
+ - tests: own the docker image
 1.0.1
  - tests: remove invalid import
 1.0.0
