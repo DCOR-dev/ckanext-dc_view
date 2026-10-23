@@ -1,3 +1,6 @@
+1.0.3
+ - fix: compatibility with setuptools>=82 (no `pkg_resources`),
+   which is shipped with CKAN 2.11.6
 1.0.2
  - enh: wrap long strings in tabular info view
  - tests: own the docker image
