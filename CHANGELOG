@@ -1,8 +1,10 @@
 1.0.4
  - fix: display start of measurement as float instead of in scientific
    notation (#7)
+ - ref: remove unused `jobs.admin_context` and `cli.click_echo`
  - ci: upload coverage to Codecov again
  - tests: increase coverage
+ - tests: remove unused import of `create_with_upload_no_temp`
 1.0.3
  - fix: compatibility with setuptools>=82 (no `pkg_resources`),
    which is shipped with CKAN 2.11.6

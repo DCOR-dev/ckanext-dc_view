@@ -10,12 +10,6 @@ import click
 from . import jobs
 
 
-def click_echo(message, am_on_a_new_line):
-    if not am_on_a_new_line:
-        click.echo("")
-    click.echo(message)
-
-
 @click.option('--modified-days', default=-1,
               help='Only run for datasets modified within this number of days '
                    + 'in the past. Set to -1 to apply to all datasets.')
