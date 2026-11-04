@@ -115,6 +115,9 @@ jobs:
              --cov-append \
              ckanext
 
+      - name: Install Codecov requirements
+        run: apt-get update && apt-get install -y curl gpg
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
