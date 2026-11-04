@@ -111,5 +111,15 @@ jobs:
           pytest -v --ckan-ini=/srv/app/ckan.ini \
              --cov=ckanext.dc_view \
              --cov-report=xml \
+             --cov-report=term-missing \
              --cov-append \
              ckanext
+
+      - name: Install Codecov requirements
+        run: apt-get update && apt-get install -y curl gpg
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage.xml
+          flags: ${{ matrix.dcor_control }}
