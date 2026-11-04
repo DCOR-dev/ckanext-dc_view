@@ -1,6 +1,8 @@
 1.0.4
  - fix: display start of measurement as float instead of in scientific
    notation (#7)
+ - ci: upload coverage to Codecov again
+ - tests: increase coverage
 1.0.3
  - fix: compatibility with setuptools>=82 (no `pkg_resources`),
    which is shipped with CKAN 2.11.6
