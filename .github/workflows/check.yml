@@ -114,3 +114,9 @@ jobs:
              --cov-report=term-missing \
              --cov-append \
              ckanext
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage.xml
+          flags: ${{ matrix.dcor_control }}
