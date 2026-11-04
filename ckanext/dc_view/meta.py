@@ -34,7 +34,10 @@ def meta_html_table(meta, sec):
     kn = [(dclab.dfn.config_descr[sec][key], key) for key in meta[sec].keys()]
     for name, key in sorted(kn):
         value = meta[sec][key]
-        if isinstance(value, numbers.Number):
+        if sec == "experiment" and key == "timestamp":
+            # unix time; ".4g" would yield undecipherable "1.742e+09"
+            value = f"{value:.1f}"
+        elif isinstance(value, numbers.Number):
             value = f"{value:.4g}"
 
         # Special cases
