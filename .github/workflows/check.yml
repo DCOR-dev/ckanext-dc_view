@@ -42,7 +42,7 @@ jobs:
           --health-timeout 5s 
           --health-retries 10
       redis:
-        image: redis:3
+        image: redis:7
       minio:
         image: mpzpm/dcor-dev:minio-latest
         # Note:
