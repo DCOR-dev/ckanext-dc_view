@@ -28,10 +28,6 @@ matplotlib.use('agg')
 import matplotlib.pylab as plt  # noqa: E402
 
 
-def admin_context():
-    return {'ignore_auth': True, 'user': 'default'}
-
-
 @rqjob_register(ckanext="dc_view",
                 queue="dcor-normal",
                 timeout=3600,

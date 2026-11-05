@@ -5,10 +5,7 @@ import ckan.common
 import ckan.model
 import ckan.tests.factories as factories
 import dcor_shared
-from dcor_shared.testing import (  # noqa: F401
-    make_dataset_via_s3, synchronous_enqueue_job,
-    create_with_upload_no_temp
-)
+from dcor_shared.testing import make_dataset_via_s3, synchronous_enqueue_job
 
 import pytest
 
