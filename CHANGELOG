@@ -1,3 +1,5 @@
+1.0.5
+ - tests: use Redis 7 in CI (CKAN 2.12 requires Redis >= 6)
 1.0.4
  - fix: display start of measurement as float instead of in scientific
    notation (#7)
